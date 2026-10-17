@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+<script>
+    window.addEventListener('error', function(e) {
+        console.error('%c[FATAL SCRIPT ERROR]', 'color:red;font-weight:bold;',
+            '\nFile:', e.filename,
+            '\nLine:', e.lineno,
+            '\nColumn:', e.colno,
+            '\nMessage:', e.message);
+    }, true);
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Replay</title>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<link rel="stylesheet" href="unified-color-picker.css">
+<link rel="stylesheet" href="drawing.css">
+<link rel="stylesheet" href="multichart.css">
+<link rel="stylesheet" href="alerts.css">
+<link rel="stylesheet" href="tv-theme.css">
+<link rel="stylesheet" href="tv-timeframe-menu.css">
+<link rel="stylesheet" href="tv-settings.css">
+<link rel="stylesheet" href="tv-left-toolbar.css">
+<link rel="stylesheet" href="tv-trade.css">
+<style>
+
+body{
+    margin:0;
+    background:#180F24;
+    overflow:hidden;
+}
+
+#chart {
+  /* الأبعاد الفعلية الآن تُتحكم بها بالكامل من tv-theme.css عبر
+       position:fixed + top/left/right/bottom، حتى يمتد الشارت بدقة
+       من حافة الشريط الجانبي إلى الحافة الفعلية للشاشة بدون أي
+       امتداد خارج حدود العرض يقصّ محور السعر أو محور الوقت. */
+}
+
+
+#controls {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    backdrop-filter: none;
+    border-top: none;
+    z-index: 1000;
+}
+#controls button, #controls select {
+    transform: scale(.82);
+}
+#controls button:hover {
+    background: rgba(255, 255, 255, .1) !important;
+    border-radius: 6px;
+}
+button,
+select {
+    
+    height: 28px;
+    
+    padding: 0 8px;
+    
+    border-radius: 7px;
+    
+    border: 1px solid rgba(255, 255, 255, .08);
+    
+    background: #151d2f;
+    
+    color: #d7dde8;
+    
+    font-size: 11px;
+    
+    font-weight: 500;
+    
+    transition: .2s;
+    
+}
+
+button:hover,
+select:hover {
+    
+    background: #202a40;
+    
+}
+
+.activeBtn {
+    
+    background: #2e7d32 !important;
+    
+    border-color: #43a047 !important;
+    
+}
+
+
+#backtestModal{
+
+    display:none;
+
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:
+    translate(-50%,-50%);
+
+    width:340px;
+
+    padding:28px;
+
+    border-radius:24px;
+
+    background:
+    rgba(36,23,55,.85);
+
+    backdrop-filter:
+    blur(18px);
+
+    border:1px solid
+    rgba(255,255,255,.08);
+
+    box-shadow:
+    0 20px 80px
+    rgba(0,0,0,.55);
+
+    z-index:9999;
+
+    animation:
+    modalOpen .25s ease;
+
+}
+
+#backtestModalClose {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,.08);
+    color: #d7dde8;
+    font-size: 13px;
+    cursor: pointer;
+}
+#backtestModalClose:hover { background: rgba(255,255,255,.18); }
+
+@keyframes modalOpen{
+
+from{
+
+opacity:0;
+
+transform:
+translate(-50%,-40%)
+scale(.95);
+
+}
+
+to{
+
+opacity:1;
+
+transform:
+translate(-50%,-50%)
+scale(1);
+
+}
+
+}
+
+.modalTitle{
+
+    color:white;
+
+    font-size:24px;
+
+    font-weight:700;
+
+    text-align:center;
+
+    margin-bottom:8px;
+
+}
+
+.modalText{
+
+    color:#9ca3af;
+
+    text-align:center;
+
+    font-size:13px;
+
+    margin-bottom:20px;
+
+}
+
+#backtestModal input{
+
+    width:100%;
+
+    height:54px;
+
+    box-sizing:border-box;
+
+    border:none;
+
+    outline:none;
+
+    border-radius:16px;
+
+    background:#180F24;
+
+    color:white;
+
+    padding:0 14px;
+
+    margin-bottom:16px;
+
+}
+
+#startBacktest{
+
+    width:100%;
+
+    height:54px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:
+    linear-gradient(
+    135deg,
+    #8B5CF6,
+    #6D28D9
+    );
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+}
+
+#startBacktest:hover{
+
+    transform:
+    translateY(-2px);
+
+}
+
+.hidden {
+    display: none !important;
+}
+#backtestBtn {
+    color: #60a5fa;
+}
+
+#playBtn {
+    color: #4CAF50;
+}
+
+#pauseBtn {
+    color: #FFC107;
+}
+
+#exitBacktestBtn {
+    color: #EF4444;
+}
+
+#prevBtn,
+#nextBtn {
+    width: 36px;
+    padding: 0;
+}
+
+#loading {
+
+    position: fixed;
+    inset: 0;
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    backdrop-filter: blur(12px);
+
+    background: rgba(
+        24,
+        15,
+        36,
+        0.35
+    );
+
+    z-index: 9999;
+
+}
+
+.loader {
+
+    width: 60px;
+    height: 60px;
+
+    border: 4px solid rgba(
+        255,
+        255,
+        255,
+        0.15
+    );
+
+    border-top: 4px solid #60a5fa;
+
+    border-radius: 50%;
+
+    animation:
+    spin 1s linear infinite;
+
+}
+
+.loadingText {
+
+    margin-top: 16px;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+
+}
+
+@keyframes spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div id="controls">
+ 
+    <select id="pairSelect">
+        <option value="XAUUSD">Gold</option>
+        <option value="XAGUSD">XAGUSD</option>
+        <option value="EURUSD">EURUSD</option>
+        <option value="GBPUSD">GBPUSD</option>
+        <option value="USDJPY">USDJPY</option>
+        <option value="AUDUSD">AUDUSD</option>
+        <option value="USDCAD">USDCAD</option>
+        <option value="USDCHF">USDCHF</option>
+        <option value="NZDUSD">NZDUSD</option>
+    </select>
+    
+<select id="timeframeSelect">
+    <optgroup label="Ticks (غير مدعوم حالياً)">
+        <option value="tick1" disabled>1T</option>
+        <option value="tick10" disabled>10T</option>
+        <option value="tick100" disabled>100T</option>
+        <option value="tick1000" disabled>1000T</option>
+    </optgroup>
+    <optgroup label="Seconds (غير مدعوم حالياً)">
+        <option value="sec1" disabled>1S</option>
+        <option value="sec5" disabled>5S</option>
+        <option value="sec10" disabled>10S</option>
+        <option value="sec15" disabled>15S</option>
+        <option value="sec30" disabled>30S</option>
+        <option value="sec45" disabled>45S</option>
+    </optgroup>
+    <optgroup label="Minutes">
+        <option value="1">1m</option>
+        <option value="3">3m</option>
+        <option value="5">5m</option>
+        <option value="10">10m</option>
+        <option value="15">15m</option>
+        <option value="30">30m</option>
+        <option value="45">45m</option>
+    </optgroup>
+    <optgroup label="Hours">
+        <option value="60">1H</option>
+        <option value="120">2H</option>
+        <option value="180">3H</option>
+        <option value="240">4H</option>
+        <option value="360">6H</option>
+        <option value="480">8H</option>
+        <option value="720">12H</option>
+    </optgroup>
+    <optgroup label="Higher Timeframes">
+        <option value="1440">1D</option>
+        <option value="10080">1W</option>
+        <option value="43200">1MO</option>
+        <option value="129600">3MO</option>
+        <option value="259200">6MO</option>
+        <option value="518400">12MO</option>
+    </optgroup>
+    <option value="custom">+ Custom Interval...</option>
+</select>
+    
+    <button id="settingsBtn" title="الإعدادات">⚙️</button>
+    
+<button id="backtestBtn">
+    Replay
+</button>
+    
+    <div id="backtestControls" class="hidden">
+        
+<button id="prevBtn">◀</button>
+<button id="playBtn">▶</button>
+<button id="pauseBtn">⏸</button>
+<button id="nextBtn">▶▶</button>
+        
+        <select id="speedSelect">
+            <option value="1000">1x</option>
+            <option value="500">2x</option>
+            <option value="200">5x</option>
+            <option value="100">10x</option>
+        </select>
+        
+    </div>
+    
+<button
+id="exitBacktestBtn"
+class="hidden">
+Exit
+</button>
+    
+</div>
+    
+
+<div id="loading">
+    
+    <div class="loader"></div>
+    
+    <div class="loadingText">
+        Loading Data...
+    </div>
+    
+</div>
+
+
+<div id="chart"></div>
+
+<div id="backtestModal">
+    
+    <button id="backtestModalClose" title="إغلاق">✕</button>
+    
+   <div class="modalTitle">
+    📈 Replay
+</div>
+
+  <div class="modalText">
+    Choose start date
+    to begin Replay
+</div>
+
+ <input type="datetime-local" id="startDate" min="2000-01-01T00:00" max="2025-12-31T23:59">
+    <button id="startBacktest">
+        Start Backtesting
+    </button>
+    </div>
+    
+<!-- ==== استبدل الـ div#colorPicker القديم كامل بهذا ==== -->
+
+<div id="colorPicker" class="hidden">
+
+  <!-- ===== الشاشة الأولى: شبكة الألوان ===== -->
+  <div id="cpGridView">
+    <div class="cp-grid" id="cpGrid"></div>
+
+    <div class="cp-sep"></div>
+
+    <div class="cp-grid" id="cpGridMaterial"></div>
+
+    <div class="cp-custom-row" id="cpCustomRow">
+      <button class="cp-add-btn" id="cpAddBtn" title="لون مخصص">+</button>
+      <!-- الألوان المخصصة المحفوظة تنضاف هنا تلقائياً بالجافاسكربت -->
+    </div>
+
+    <div class="cp-opacity-row">
+      <div class="cp-opacity-label">الشفافية</div>
+      <div class="cp-opacity-controls">
+        <input type="text" id="cpOpacityInput" class="cp-opacity-input" value="100%">
+        <input type="range" id="cpOpacitySlider" class="cp-opacity-slider" min="0" max="100" value="100">
+      </div>
+    </div>
+  </div>
+
+
+<div id="colorPickerSettings" class="hidden">
+  <div id="cpGridViewSettings">
+    <div class="cp-grid cp-grid-settings" id="cpGridSettings"></div>
+    <div class="cp-sep"></div>
+    <div class="cp-grid cp-grid-settings" id="cpGridMaterialSettings"></div>
+    <div class="cp-custom-row" id="cpCustomRowSettings">
+      <button class="cp-add-btn" id="cpAddBtnSettings" title="لون مخصص">+</button>
+    </div>
+  </div>
+  <div id="cpAdvancedViewSettings" class="hidden">
+    <div class="cp-adv-header">
+      <button class="cp-confirm-btn" id="cpConfirmBtnSettings">إضافة</button>
+      <div class="cp-hex-wrap">
+        <span class="cp-hex-hash">#</span>
+        <input type="text" id="cpHexInputSettings" class="cp-hex-input" value="2e6365" maxlength="6">
+      </div>
+      <div class="cp-preview-swatch" id="cpPreviewSwatchSettings"></div>
+    </div>
+    <div class="cp-adv-body">
+      <div class="cp-hue-slider" id="cpHueSliderSettings">
+        <div class="cp-hue-thumb" id="cpHueThumbSettings"></div>
+      </div>
+      <div class="cp-sv-square" id="cpSvSquareSettings">
+        <div class="cp-sv-cursor" id="cpSvCursorSettings"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ===== الشاشة الثانية: منتقي متقدم (Hue + Saturation/Value + Hex) ===== -->
+  <div id="cpAdvancedView" class="hidden">
+    <div class="cp-adv-header">
+      <button class="cp-confirm-btn" id="cpConfirmBtn">إضافة</button>
+      <div class="cp-hex-wrap">
+        <span class="cp-hex-hash">#</span>
+        <input type="text" id="cpHexInput" class="cp-hex-input" value="2e6365" maxlength="6">
+      </div>
+      <div class="cp-preview-swatch" id="cpPreviewSwatch"></div>
+    </div>
+
+    <div class="cp-adv-body">
+      <div class="cp-hue-slider" id="cpHueSlider">
+        <div class="cp-hue-thumb" id="cpHueThumb"></div>
+      </div>
+      <div class="cp-sv-square" id="cpSvSquare">
+        <div class="cp-sv-cursor" id="cpSvCursor"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==== نهاية الاستبدال ==== -->
+
+<!-- ==== نهاية الجزء المضاف ==== -->
+
+<script src="tv-data-engine.js"></script>
+<script src="tv-data-import.js"></script>
+<script src="tv-local-data.js"></script>
+<script src="tv-symbol-availability.js"></script>
+<script src="unified-color-picker.js"></script>
+<script src="tv-position-calc.js"></script>
+<script src="tv-draw-geom.js"></script>
+<script src="drawing.js"></script>
+<script src="backtest.js"></script>
+<script src="tv-compare.js"></script>
+<script src="tv-layouts.js"></script>
+<script src="multichart.js"></script>
+<script src="alerts.js"></script>
+<script src="Tv-topbar.js"></script>
+<script src="tv-timeframe-menu.js"></script>
+<script src="tv-settings.js"></script>
+<script src="tv-emoji-picker.js"></script>
+<script src="tv-left-toolbar.js"></script>
+<script src="tv-session-breaks.js"></script>
+<script src="tv-trading-sim.js"></script>
+<script src="tv-indicators.js"></script>
+<script src="tv-indicators-ui.js"></script>
+<script src="tv-trade-ui.js"></script>
+<script src="tv-aggregate.js"></script>
+<script src="tv-strategy.js"></script>
+<script src="tv-backtest-ui.js"></script>
+</body>
+</html>

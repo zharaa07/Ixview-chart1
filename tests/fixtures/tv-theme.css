@@ -1,0 +1,335 @@
+/* =========================================================================
+   tv-theme.css — TradingView-authentic visual theme
+
+   Loads LAST (after settings.css / drawing.css / multichart.css / alerts.css)
+   so these rules win the cascade without needing !important everywhere.
+   Replaces: purple gradients (#8B5CF6/#6D28D9) -> flat TradingView blue
+   (#2962FF), glassmorphic backdrop-blur -> solid TradingView panel color
+   (#1e222d), oversized border-radius -> TradingView's tighter 4-6px,
+   and the app-wide background -> TradingView's actual #131722 / #1e222d
+   / #2a2e39 triad.
+   ========================================================================= */
+
+:root {
+  --tv-bg: #131722;
+  --tv-panel: #1E222D;
+  --tv-panel-alt: #2A2E39;
+  --tv-border: #2A2E39;
+  --tv-text: #D1D4DC;
+  --tv-text-dim: #787B86;
+  --tv-blue: #2962FF;
+  --tv-blue-hover: #1e53e5;
+  --tv-green: #26A69A;
+  --tv-red: #EF5350;
+  --tv-selection: #2962FF;
+  --tv-header-height: 32px;
+  --tv-toolbar-width: 34px;
+  --tv-radius: 3px;
+  --tv-radius-lg: 5px;
+}
+
+/* ---------------------------------------------------------- base surfaces */
+body { background: var(--tv-bg); } /* بدون !important — يسمح لـ tv-settings.js بالتحكم الفعلي بالخلفية */
+#chart, .mc-pane, #mcGrid { background: var(--tv-bg); }
+#controls, .mc-pane-header, #dtDrawBtn, #mcLayoutBtn, #mcSyncBtn,
+#mcWatchlistBtn, #mcCorrBtn, #alAlertsBtn, button, select {
+  border-radius: var(--tv-radius) !important;
+}
+
+/* ---------------------------------------------------------- kill glassmorphism */
+#mcLayoutMenu, #mcWatchlistPanel, #mcCorrPanel, #alPanel, .mc-search-box,
+#dtToolMenu, #dtSettingsModal, #dtObjectTree, #colorPicker,
+#settingsModal, #backtestModal, .mc-compare-picker,
+#tvSettingsSheet, #colorPickerSettings {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(30, 34, 45, .92) !important;
+  border: 1px solid rgba(255, 255, 255, .08) !important;
+  border-radius: var(--tv-radius-lg) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .55) !important;
+}
+
+/* ---------------------------------------------------------- flat panels for pane headers / bars */
+#controls {
+  background: var(--tv-panel) !important;
+  backdrop-filter: none !important;
+  border-radius: 0 !important;
+  border-top: 1px solid var(--tv-border) !important;
+  border-bottom: none !important;
+}
+.mc-pane-header, .mc-compare-list, .mc-spread-list, #dtOverlay ~ * { background: var(--tv-panel) !important; }
+
+/* ---------------------------------------------------------- buttons: flat blue instead of purple gradient */
+#dtDrawBtn.active,
+.dt-sm-btn.primary,
+.cp-confirm-btn,
+#mcSyncBtn.active,
+.mc-percent-btn.active,
+.mc-corr-calc,
+.al-create-btn,
+.sm-tab.active,
+.sm-btn.primary {
+  background: var(--tv-blue) !important;
+  background-image: none !important;
+  border-color: var(--tv-blue) !important;
+  color: #fff !important;
+}
+#dtDrawBtn.active:hover, .dt-sm-btn.primary:hover, .mc-corr-calc:hover, .al-create-btn:hover {
+  background: var(--tv-blue-hover) !important;
+}
+
+.dt-menu-item.active, .dt-sm-tab.active, .dt-magnet-opt.active,
+.mc-search-tab.active, .al-tab.active {
+  background: var(--tv-blue) !important;
+  color: #fff !important;
+}
+
+.mc-layout-item:hover, .mc-compare-btn:hover, .dt-sm-level-add:hover,
+.mc-search-row:hover, .dt-menu-item:hover {
+  background: rgba(41, 98, 255, .12) !important;
+}
+.mc-compare-btn, .dt-sm-level-add { color: var(--tv-blue) !important; border-color: rgba(41, 98, 255, .4) !important; }
+
+.mc-compare-picker button, .mc-wl-add button {
+  background: var(--tv-blue) !important;
+}
+
+.sm-checkbox.checked, .dt-sm-checkbox.checked {
+  background: var(--tv-blue) !important;
+  border-color: var(--tv-blue) !important;
+}
+
+.dt-swatch, #dtSwatchPreview { border-color: var(--tv-border) !important; }
+
+/* ---------------------------------------------------------- text / borders unify */
+.dt-sm-title, .sm-title, .al-header, .mc-wl-header, #dtObjectTree .dt-sm-title {
+  color: #fff !important;
+}
+.dt-sm-row-label, .sm-label, .mc-pane-label, .al-row-msg { color: var(--tv-text) !important; }
+.mc-pane-label { color: var(--tv-blue) !important; }
+
+/* candlestick up/down stay TradingView's exact green/red (slightly different
+   from the app's current #26a69a / #ef5350 — close enough visually, but if
+   you want an exact match, also change upColor/downColor in settings.js
+   defaults and backtest.js candleSeries options to var(--tv-green)/var(--tv-red) values above). */
+
+/* ---------------------------------------------------------- scrollbars */
+* { scrollbar-color: var(--tv-panel-alt) transparent; }
+*::-webkit-scrollbar-thumb { background: var(--tv-panel-alt) !important; }
+
+/* ---------------------------------------------------------- top bar (see tv-topbar.js) */
+/* ---------------------------------------------------------- top bar (see tv-topbar.js) — Semi-transparent overlay */
+
+/* ============ الشريط العلوي — تعريف نهائي واحد، يُلغي أي تراكب سابق ============ */
+/* ============ الشريط العلوي — أزرار عائمة بدون أي خلفية/حاوية ============ */
+/* ============ الشريط العلوي — صف محجوز الارتفاع فعلياً، بلا خلفية صندوق ============ */
+#tvTopBar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: var(--tv-header-height, 34px) !important;
+  min-height: var(--tv-header-height, 34px) !important;
+  max-width: 100vw;
+  display: flex !important;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px !important;
+  margin: 0 !important;
+  z-index: 1000;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, .15) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#tvTopBar::-webkit-scrollbar { display: none; }
+
+/* كل زر بداخله بلا خلفية افتراضياً — يظهر فقط عند التمرير فوقه */
+#tvTopBar button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  transform: scale(.82);
+  transform-origin: right center;
+}
+#tvTopBar button span,
+#tvTopBar button .tvlt-btn,
+#tvTopBar .tv-symbol-label,
+#tvTopBar .tv-topbar-btn,
+#tvTopBar .tv-interval-badge {
+  color: #000000 !important;
+}
+#tvTopBar button:hover {
+  background: rgba(0, 0, 0, .08) !important;
+  border-radius: 6px !important;
+}
+
+/* Safety net: even if more buttons get added later, never let either bar
+   silently overflow off-screen again. */
+#controls { flex-wrap: wrap; row-gap: 4px; }
+
+
+.mc-hidden-select { display: none !important; }
+.tv-symbol-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--tv-radius, 4px);
+  border: 1px solid rgba(255,255,255,.08);
+  background: var(--tv-panel, #151d2f);
+  color: var(--tv-text, #d7dde8);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tv-symbol-btn:hover { background: rgba(41, 98, 255, .12); }
+
+/* ---------------------------------------------------------- توحيد أبعاد الأشرطة مع TradingView */
+#dtDrawBtn, #mcLayoutBtn, #tvDockCustomizeBtn,
+button[id^="mc"], button[id^="al"], #settingsBtn, #backtestBtn {
+  border-radius: var(--tv-radius) !important;
+}
+
+/* الشريط الجانبي الأيسر (عند إسقاط أزرار عليه عبر tv-dockable.js) بنفس عرض TradingView */
+#tvDockLeft:not(:empty) {
+  width: var(--tv-toolbar-width) !important;
+  background: var(--tv-bg) !important;
+  border-right: 1px solid var(--tv-border) !important;
+}
+
+/* توحيد لون التحديد (Selection) على كل عناصر الواجهة النشطة */
+.dt-menu-item.active, .dt-sm-tab.active, .dt-magnet-opt.active,
+.mc-search-tab.active, .al-tab.active, .tvs-tab.active, .tvs-radio.active,
+.mc-legend-mode-btn.active, #dtDrawBtn.active {
+  background: var(--tv-selection) !important;
+  border-color: var(--tv-selection) !important;
+}
+
+/* شموع الشارت الرئيسي والشاشات الإضافية بنفس اللون الدقيق المطلوب */
+
+#mcGrid {
+  position: fixed !important;
+  top: var(--tv-header-height, 34px) !important;
+  left: var(--tv-toolbar-width, 34px) !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+#chart {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+/* ---------------------------------------------------------- عناصر الشريط العلوي الجديدة (مصغّرة) */
+
+.tv-icon-btn {
+  width: 26px; height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--tv-text-dim, #787B86);
+  font-size: 13px;
+  border-radius: var(--tv-radius, 3px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tv-icon-btn:hover { background: var(--tv-panel-alt, #2A2E39); color: var(--tv-text, #D1D4DC); }
+
+.tv-topbar-btn {
+  height: 26px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  color: var(--tv-text, #D1D4DC);
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: var(--tv-radius, 3px);
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.tv-topbar-btn:hover { background: var(--tv-panel-alt, #2A2E39); }
+.tv-topbar-btn.tv-disabled { opacity: .4; cursor: not-allowed; }
+.tv-topbar-btn.tv-disabled:hover { background: transparent; }
+
+.tv-interval-badge {
+  height: 26px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  color: var(--tv-text, #D1D4DC);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--tv-radius, 3px);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.tv-interval-badge:hover { background: var(--tv-panel-alt, #2A2E39); }
+
+.tv-symbol-btn {
+  height: 26px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: var(--tv-text, #D1D4DC);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--tv-radius, 3px);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.tv-symbol-btn:hover { background: var(--tv-panel-alt, #2A2E39); }
+
+.tv-symbol-icon {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.tv-symbol-label { white-space: nowrap; }
+
+#startBacktest { background: var(--tv-blue) !important; background-image: none !important; }
+#backtestBtn { color: var(--tv-blue) !important; }
+.activeBtn { background: var(--tv-green) !important; border-color: var(--tv-green) !important; }
+
+
+
+/* ============ تعريف نهائي حاسم لموضع الشارت — آخر قاعدة بالملف عمداً ============ */
+#mcGrid {
+  position: fixed !important;
+  top: var(--tv-header-height, 34px) !important;
+  left: var(--tv-toolbar-width, 34px) !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+#chart {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}

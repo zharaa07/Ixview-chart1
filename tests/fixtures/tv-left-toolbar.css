@@ -1,0 +1,74 @@
+/* =========================================================================
+   tv-left-toolbar.css — نسخة مصغّرة بحشو أقل بكثير
+   ========================================================================= */
+
+#tvLeftToolbar {
+  position: fixed;
+  top: var(--tv-header-height, 34px);
+  left: 0;
+  bottom: 0;
+  width: var(--tv-toolbar-width, 34px);
+  background: #ffffff;
+  border-right: 1px solid #e0e3eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 900;
+  padding: 4px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+#tvLeftToolbar {
+  background: var(--tv-chart-bg-color, #131722) !important;
+  border-right: 1px solid rgba(0, 0, 0, .15) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#tvLeftToolbar::-webkit-scrollbar { display: none; }
+
+.tvlt-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.tvlt-spacer { flex: 0 0 20px; min-height: 20px; }
+
+.tvlt-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #4a4e5a;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tvlt-btn:hover { background: rgba(41, 98, 255, .08); color: #2962FF; }
+.tvlt-btn.tvlt-tool-active { background: rgba(41, 98, 255, .12); color: #2962FF; }
+.tvlt-btn.tvlt-active { background: rgba(41, 98, 255, .12); color: #2962FF; }
+
+/* لا نستخدم display:none لأن ذلك يصفّر getBoundingClientRect() بالكامل
+   (يرجع كل القيم 0)، وهذا كان يكسر حساب موضع قائمة الأدوات بـ
+   drawing.js (تعتمد على مكان هذا الزر لتحديد مكان القائمة). بدلاً من
+   ذلك: نخرجه من تسلسل الصفحة تماماً بـ position:fixed، ونخفيه بصرياً
+   بالشفافية فقط، والموضع الفعلي يُحدَّث ديناميكياً من tv-left-toolbar.js
+   قبل كل فتح للقائمة عبر syncHiddenDrawBtnPosition().
+*/
+.tvlt-hidden-old {
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 24px; height: 24px;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+

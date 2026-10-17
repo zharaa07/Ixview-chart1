@@ -1,0 +1,858 @@
+/* =========================================================================
+   multichart.css — Multi-Chart Layout System (Phase 1)
+   ========================================================================= */
+
+#mcGrid {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  gap: 1px;
+  background: rgba(0, 0, 0, .15);
+}
+
+.mc-grid.mc-cols-1.mc-rows-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.mc-grid.mc-cols-2.mc-rows-1 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+.mc-grid.mc-cols-1.mc-rows-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+.mc-grid.mc-cols-3.mc-rows-1 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr; }
+.mc-grid.mc-cols-2.mc-rows-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-grid.mc-cols-3.mc-rows-2 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-grid.mc-cols-4.mc-rows-2 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-grid.mc-cols-4.mc-rows-4 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1fr; }
+
+.mc-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #180F24;
+  overflow: hidden;
+}
+
+.mc-pane-header {
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  background: #10091a;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  z-index: 5;
+}
+
+/* أي .mc-pane-header بلا محتوى فعلي بداخله (حالة كل شاشات المقارنة بعد
+   نقل كل التحكم للشريط العلوي) — يُزال بالكامل بدل ترك صندوق أسود فارغ. */
+/* إخفاء غير مشروط لرأس أي شاشة فرعية (غير الرئيسية) — بغض النظر عن
+   محتواها (حتى لو أُلحق بها زر القلم لاحقاً)، لأن التحكم بات حصرياً
+   من الشريط العلوي والشريط الجانبي الموحّد فقط. */
+.mc-pane:not(.mc-pane-primary) .mc-pane-header {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.mc-pane-header-primary { justify-content: flex-start; }
+
+.mc-pane-label {
+  color: #8B5CF6;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.mc-pane-select {
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 11px;
+}
+
+.mc-pane-body { position: relative; flex: 1; min-height: 0; }
+
+/* The existing #chart div (pane 1) becomes a flex child that fills the
+   remaining space below its header, overriding its old 100vw/100vh rule
+   via higher CSS specificity — no inline style needed, autoSize handles
+   the actual canvas sizing. */
+/* أبعاد #chart الآن تُدار بالكامل من tv-theme.css عبر position:fixed
+   بتموضع left/right/top/bottom دقيق. القاعدة القديمة (width/height:
+   100% !important) كانت تتصادم مع ذلك التموضع — لعنصر position:fixed،
+   width:100% تُحسب من الشاشة كاملة (viewport) لا من مكانه الفعلي، فتمدد
+   الشارت خارج حدود العرض من اليمين والأسفل وتقصّ محور السعر والتاريخ. */
+.mc-pane-primary #chart { min-height: 0; }
+
+.mc-pane.mc-loading::after {
+  content: 'Loading...';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d7dde8;
+  font-size: 12px;
+  background: rgba(0, 0, 0, .4);
+  z-index: 10;
+}
+
+#mcLayoutBtn {
+  width: 34px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: .2s;
+}
+#mcLayoutBtn:hover { background: #202a40; }
+
+#mcLayoutMenu {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 14, 32, .95);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  backdrop-filter: blur(18px);
+  z-index: 2500;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+}
+#mcLayoutMenu.hidden { display: none; }
+
+.mc-layout-item {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #d7dde8;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.mc-layout-item:hover { background: rgba(139, 92, 246, .15); }
+
+.mc-menu-divider { height: 1px; background: rgba(255, 255, 255, .08); margin: 6px 2px; }
+
+.mc-saved-layout-row { display: flex; align-items: center; gap: 2px; }
+.mc-saved-name { flex: 1; }
+.mc-saved-icon-btn {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #7d8296;
+  cursor: pointer;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.mc-saved-icon-btn:hover { background: rgba(255, 255, 255, .08); color: #d7dde8; }
+
+#mcSyncBtn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #7d8296;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: .2s;
+}
+#mcSyncBtn:hover { background: #202a40; }
+#mcSyncBtn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  border-color: transparent;
+}
+
+/* ---------------------------------------------------------- symbol compare */
+.mc-compare-btn {
+  margin-left: auto;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px dashed rgba(255, 255, 255, .18);
+  background: transparent;
+  color: #8B5CF6;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mc-compare-btn:hover { background: rgba(139, 92, 246, .12); }
+
+.mc-compare-picker {
+  position: fixed;
+  top: 34px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 6px;
+  background: rgba(20, 14, 32, .97);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .5);
+  z-index: 20;
+}
+.mc-compare-picker select {
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 11px;
+}
+.mc-compare-picker button {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: #8B5CF6;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mc-compare-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+  max-height: 96px;
+  overflow-y: auto;
+  background: #10091a;
+  z-index: 4;
+}
+.mc-compare-list:empty { display: none; }
+
+.mc-compare-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, .04);
+}
+.mc-compare-color {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+.mc-compare-name {
+  color: #d7dde8;
+  font-size: 10.5px;
+  font-weight: 600;
+  width: 56px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mc-compare-row select {
+  height: 20px;
+  padding: 0 3px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 10px;
+}
+.mc-compare-row input[type="range"] { width: 46px; accent-color: #8B5CF6; }
+.mc-compare-vis, .mc-compare-del {
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: #7d8296;
+  font-size: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mc-compare-vis:hover, .mc-compare-del:hover { background: rgba(255, 255, 255, .08); color: #d7dde8; }
+.mc-compare-del:hover { color: #ef5350; }
+
+.mc-percent-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  border-color: transparent;
+  border-style: solid;
+}
+
+.mc-spread-minus { color: #7d8296; font-size: 13px; font-weight: 700; }
+
+.mc-spread-list { border-top: 1px solid rgba(255, 255, 255, .05); }
+
+/* ---------------------------------------------------------- mini watchlist */
+#mcWatchlistBtn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#mcWatchlistBtn:hover { background: #202a40; }
+
+#mcWatchlistPanel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 240px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(20, 14, 32, .95);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+  z-index: 2400;
+  scrollbar-width: thin;
+}
+#mcWatchlistPanel.hidden { display: none; }
+
+.mc-wl-header {
+  padding: 12px 14px 8px;
+  color: #d7dde8;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.mc-wl-add {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.mc-wl-add select {
+  flex: 1;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 11px;
+}
+.mc-wl-add button {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: #8B5CF6;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mc-wl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .04);
+}
+.mc-wl-row:hover { background: rgba(255, 255, 255, .03); }
+.mc-wl-name { color: #d7dde8; font-size: 11.5px; font-weight: 700; width: 58px; flex-shrink: 0; }
+.mc-wl-price { color: #d7dde8; font-size: 11px; flex: 1; text-align: right; }
+.mc-wl-chg { font-size: 10px; width: auto; text-align: right; flex-shrink: 0; }
+.mc-wl-chg.pos { color: #26a69a; }
+.mc-wl-chg.neg { color: #ef5350; }
+.mc-wl-del {
+  width: 16px; height: 16px;
+  border: none;
+  background: transparent;
+  color: #4a5066;
+  font-size: 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mc-wl-row:hover .mc-wl-del { color: #7d8296; }
+.mc-wl-del:hover { color: #ef5350 !important; }
+
+/* ---------------------------------------------------------- TradingView-style polish */
+#mcGrid, #mcGrid * { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+#mcLayoutBtn, #mcSyncBtn, #mcWatchlistBtn, .mc-compare-btn,
+.mc-saved-icon-btn, .mc-compare-vis, .mc-compare-del, .mc-layout-item {
+  transition: background-color .15s ease, color .15s ease, transform .1s ease, border-color .15s ease;
+}
+#mcLayoutBtn:active, #mcSyncBtn:active, #mcWatchlistBtn:active, .mc-compare-btn:active {
+  transform: scale(.94);
+}
+
+@keyframes mcPopIn {
+  from { opacity: 0; transform: translateY(4px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+#mcLayoutMenu:not(.hidden), .mc-compare-picker, #mcWatchlistPanel:not(.hidden) {
+  animation: mcPopIn .14s ease-out;
+}
+
+.mc-pane { transition: outline-color .15s ease; }
+.mc-pane-select, .mc-compare-row select, .mc-wl-add select {
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.mc-pane-select:hover, .mc-compare-row select:hover { border-color: rgba(139, 92, 246, .4); }
+
+.mc-compare-list, #mcWatchlistPanel { scrollbar-width: thin; }
+.mc-compare-list::-webkit-scrollbar, #mcWatchlistPanel::-webkit-scrollbar { width: 6px; }
+.mc-compare-list::-webkit-scrollbar-thumb, #mcWatchlistPanel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .12); border-radius: 3px;
+}
+
+/* ---------------------------------------------------------- compare legend upgrade (item 9) */
+.mc-compare-price { color: #d7dde8; font-size: 10px; width: 46px; flex-shrink: 0; text-align: right; }
+.mc-compare-chg { font-size: 9.5px; width: 44px; flex-shrink: 0; text-align: right; }
+.mc-compare-chg.pos { color: #26a69a; }
+.mc-compare-chg.neg { color: #ef5350; }
+.mc-compare-lock {
+  height: 20px; padding: 0 5px;
+  border-radius: 5px; border: none;
+  background: transparent; color: #7d8296;
+  font-size: 10px; cursor: pointer; flex-shrink: 0;
+}
+.mc-compare-lock:hover { background: rgba(255, 255, 255, .08); }
+.mc-compare-row.locked { opacity: .8; }
+.mc-compare-row.locked select,
+.mc-compare-row.locked input,
+.mc-compare-row.locked .mc-compare-color,
+.mc-compare-row.locked .mc-compare-del { cursor: not-allowed; opacity: .45; }
+
+/* ---------------------------------------------------------- correlation tool (item 4) */
+#mcCorrBtn {
+  height: 28px; padding: 0 10px;
+  border-radius: 7px; border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f; color: #d7dde8;
+  font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+}
+#mcCorrBtn:hover { background: #202a40; }
+
+#mcCorrPanel {
+  position: fixed;
+  top: 90px;
+  right: 16px;
+  width: 260px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(20, 14, 32, .95);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+  z-index: 2400;
+  scrollbar-width: thin;
+}
+#mcCorrPanel.hidden { display: none; }
+
+.mc-corr-checklist { padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+.mc-corr-check-row { display: flex; align-items: center; gap: 6px; color: #d7dde8; font-size: 11px; cursor: pointer; }
+
+.mc-corr-calc {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 8px 10px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mc-corr-results { padding: 4px 10px 10px; }
+.mc-corr-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+  color: #d7dde8; font-size: 11px;
+}
+.mc-corr-val { font-size: 12px; }
+.mc-corr-val.pos, .mc-corr-tag.pos { color: #26a69a; }
+.mc-corr-val.neg, .mc-corr-tag.neg { color: #ef5350; }
+.mc-corr-val.neu, .mc-corr-tag.neu { color: #7d8296; }
+.mc-corr-tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ---------------------------------------------------------- compare search window (item 13) */
+#mcSearchModal {
+  position: fixed; inset: 0;
+  background: #0b0712;
+  z-index: 3000;
+  display: flex;
+}
+#mcSearchModal.hidden { display: none; }
+
+.mc-search-box-full {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  background: #150e21;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: mcSearchSlideUp .18s ease-out;
+}
+@keyframes mcSearchSlideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mc-search-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  flex-shrink: 0;
+}
+.mc-search-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, .06);
+  color: #d7dde8;
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mc-search-close:hover { background: rgba(255, 255, 255, .12); }
+
+.mc-search-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: #1e1730;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.mc-search-icon { font-size: 13px; opacity: .6; flex-shrink: 0; }
+.mc-search-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #d7dde8;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.mc-search-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 0 14px 10px;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.mc-search-tabs::-webkit-scrollbar { display: none; }
+.mc-search-tab {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #7d8296;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .15s;
+  white-space: nowrap;
+}
+.mc-search-tab:hover { background: rgba(255, 255, 255, .06); color: #d7dde8; }
+.mc-search-tab.active { background: #2962FF; color: #fff; }
+
+.mc-search-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.mc-search-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, .04);
+}
+.mc-search-row:hover, .mc-search-row:active { background: rgba(255, 255, 255, .05); }
+
+.mc-search-symicon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.mc-search-textwrap { flex: 1; min-width: 0; }
+.mc-search-symname { color: #fff; font-size: 14px; font-weight: 600; }
+.mc-search-symdesc {
+  color: #7d8296; font-size: 11.5px; margin-top: 1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.mc-search-exch {
+  color: #5b6178;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, .06);
+  padding: 3px 7px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.mc-search-fav {
+  border: none; background: transparent;
+  color: #3a3f52; font-size: 17px; cursor: pointer; flex-shrink: 0;
+  padding: 4px;
+}
+.mc-search-fav.active { color: #FFC107; }
+.mc-search-empty { padding: 40px 24px; text-align: center; color: #7d8296; font-size: 13px; }
+
+
+/* ---------------------------------------------------------- pane draw button */
+.mc-pane-draw-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: #151d2f;
+  color: #d7dde8;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mc-pane-draw-btn:hover { background: #202a40; }
+
+/* ---------------------------------------------------------- Legend عائم فوق الشارت */
+.mc-legend {
+  position: absolute;
+  top: 28px;
+  left: 8px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  pointer-events: none;
+  max-width: 260px;
+}
+
+.mc-legend-modes {
+  display: flex;
+  gap: 3px;
+  pointer-events: auto;
+  margin-bottom: 2px;
+}
+.mc-legend-mode-btn {
+  padding: 3px 7px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(10, 7, 16, .75);
+  color: #9ca3af;
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.mc-legend-mode-btn:hover { background: rgba(30, 22, 48, .9); color: #d7dde8; }
+.mc-legend-mode-btn.active { background: #2962FF; color: #fff; border-color: #2962FF; }
+
+.mc-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(10, 7, 16, .55);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  width: fit-content;
+}
+.mc-legend-row.mc-legend-main { background: transparent; backdrop-filter: none; padding: 2px 6px; }
+
+.mc-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mc-legend-name {
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.mc-legend-main .mc-legend-name { font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+
+.mc-legend-price { color: #d7dde8; font-size: 10.5px; white-space: nowrap; }
+.mc-legend-chg { font-size: 9.5px; white-space: nowrap; }
+.mc-legend-chg.pos { color: #26a69a; }
+.mc-legend-chg.neg { color: #ef5350; }
+
+.mc-legend-btn {
+  width: 16px; height: 16px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 4px;
+  display: none; /* يظهر فقط عند تمرير الماوس فوق الصف */
+}
+.mc-legend-row:hover .mc-legend-btn { display: flex; align-items: center; justify-content: center; }
+.mc-legend-btn:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+
+.mc-legend-add {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px dashed rgba(255, 255, 255, .2);
+  background: rgba(10, 7, 16, .5);
+  color: #8B5CF6;
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+}
+.mc-legend-add:hover { background: rgba(139, 92, 246, .15); }
+
+/* شريط الشاشة الرئيسية القديم (Main — Gold + زر Spread) أصبح مكرراً
+   تماماً بعد إضافة tvStatusLine الجديد + زر "+" بالشريط العلوي —
+   نخفيه بصرياً فقط (بدون حذفه من الشجرة) حتى تبقى قوائم المقارنة/
+   السبريد المرتبطة به تعمل بشكل داخلي بدون كسر أي كود. */
+.mc-pane-header-primary { display: none !important; }
+
+/* ---------------------------------------------------------- Active Chart border */
+.mc-pane {
+  border: 0.5px solid rgba(0, 0, 0, .12);
+  transition: border-color .12s ease;
+}
+.mc-pane.mc-pane-active {
+  border-color: #2962FF;
+}
+.mc-pane-primary.mc-pane-active {
+  outline: 1.5px solid #2962FF;
+  outline-offset: -1.5px;
+}
+
+/* ---------------------------------------------------------- شارة معلومات الشاشة */
+.mc-pane-info { display: none !important; }
+
+/* ---------------------------------------------------------- Layout Dropdown بمعاينة بصرية */
+.mc-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+}
+.mc-layout-item-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px !important;
+  text-align: center;
+}
+.mc-layout-preview {
+  width: 44px;
+  height: 32px;
+  display: grid;
+  gap: 2px;
+  background: rgba(255,255,255,.06);
+  border-radius: 4px;
+  padding: 2px;
+}
+.mc-layout-preview span { background: rgba(139, 92, 246, .45); border-radius: 1px; }
+
+.mc-layout-preview-1 { grid-template-columns: 1fr; }
+.mc-layout-preview-2h { grid-template-columns: 1fr 1fr; }
+.mc-layout-preview-2v { grid-template-rows: 1fr 1fr; }
+.mc-layout-preview-3a { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-layout-preview-3a span:nth-child(1) { grid-column: 1; grid-row: 1; }
+.mc-layout-preview-3a span:nth-child(2) { grid-column: 1; grid-row: 2; }
+.mc-layout-preview-3a span:nth-child(3) { grid-column: 2; grid-row: 1 / 3; }
+.mc-layout-preview-3 { grid-template-columns: 1fr 1fr 1fr; }
+.mc-layout-preview-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-layout-preview-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-layout-preview-8 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.mc-layout-preview-16 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr 1fr; }
+
+.mc-layout-item-label { font-size: 10px; color: #9ca3af; font-weight: 600; }
+.mc-layout-item-visual:hover .mc-layout-item-label { color: #d7dde8; }
+
+/* ---------------------------------------------------------- Resizable Splitters */
+.mc-splitter { position: absolute; z-index: 50; }
+.mc-splitter-v { top: 0; bottom: 0; width: 6px; margin-left: -3px; cursor: col-resize; }
+.mc-splitter-h { left: 0; right: 0; height: 6px; margin-top: -3px; cursor: row-resize; }
+.mc-splitter-v:hover, body.mc-resizing-col .mc-splitter-v { background: rgba(41, 98, 255, .25); }
+.mc-splitter-h:hover, body.mc-resizing-row .mc-splitter-h { background: rgba(41, 98, 255, .25); }
+body.mc-resizing-col, body.mc-resizing-row { user-select: none; }
+
+/* ---------------------------------------------------------- لوحة المزامنة */
+#mcSyncPanel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 220px;
+  background: rgba(20, 14, 32, .95);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 14px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+  z-index: 2400;
+  padding-bottom: 8px;
+}
+#mcSyncPanel.hidden { display: none; }
+.mc-sync-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px;
+  color: #d7dde8;
+  font-size: 12px;
+  cursor: pointer;
+}
+.mc-sync-row:hover { background: rgba(255,255,255,.04); }
+.mc-sync-row input[type=checkbox] { accent-color: #2962FF; width: 14px; height: 14px; }
+.mc-sync-disabled { opacity: .4; cursor: not-allowed; }

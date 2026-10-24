@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تشخيص بيانات IXVIEW</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font:14px/1.6 sans-serif;background:#131722;color:#d1d4dc;margin:0;padding:16px}h1{font-size:18px}input,button{font:inherit;padding:6px 10px;border-radius:5px;border:1px solid #2a2e39;background:#1e222d;color:inherit}pre{background:#0d1018;border:1px solid #2a2e39;border-radius:6px;padding:12px;white-space:pre-wrap;word-break:break-all;direction:ltr;text-align:left}.ok{color:#26a69a}.bad{color:#ef5350}.warn{color:#ffb74d}</style></head><body>
+<h1>تشخيص تحميل بيانات الشارت</h1>
+<p>يفحص هذا الملف المستقل ما يراه المتصفح فعلاً عند طلب ملفات <code>data/</code> من هذا الموقع. انسخ النتيجة وأرسلها إن بقيت المشكلة.</p>
+<p><input id="sym" value="XAUUSD" style="width:140px;direction:ltr"> <button id="run">افحص</button> <button id="copy">نسخ النتيجة</button></p>
+<pre id="out">…</pre>
+<script>
+(function(){
+  const out=document.getElementById('out'); let lines=[];
+  const log=(t,c)=>{lines.push({t,c});out.innerHTML=lines.map(l=>'<span class="'+(l.c||'')+'">'+l.t.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>').join('\n');};
+  const FR=['M1','M5','M15','M30','H1','H4','D1'];
+  const RE=/^\d{4}\.\d{2}\.\d{2},\d{1,2}:\d{2},[-\d.]+,[-\d.]+,[-\d.]+,[-\d.]+/;
+  async function head(u){try{let r=await fetch(u,{method:'HEAD',cache:'no-store'});if(r.status===405||r.status===501)r=await fetch(u,{headers:{Range:'bytes=0-0'},cache:'no-store'});return r;}catch(e){return {ok:false,status:'خطأ شبكة: '+e.message,headers:{get:()=>''}}}}
+  async function run(){
+    lines=[]; const sym=(document.getElementById('sym').value||'XAUUSD').trim().toUpperCase();
+    log('الصفحة: '+location.href); log('المسار الأساسي للبيانات: '+new URL('data/',location.href).href);
+    if(location.protocol==='file:') log('⚠ تفتح الصفحة من file:// — المتصفح يمنع تحميل الملفات. شغّلها عبر GitHub Pages أو خادم محلي.','bad');
+    // 1) الفهرس
+    let manifest=null;
+    try{const r=await fetch('data/manifest.json',{cache:'no-store'}); if(r.ok){manifest=await r.json(); log('✔ data/manifest.json موجود — '+Object.keys(manifest.symbols||{}).length+' أصل','ok'); if(manifest.skipped&&manifest.skipped.length) log('  ملفات لم تُفهرس: '+manifest.skipped.join(' | '),'warn');}
+      else log('• data/manifest.json غير موجود (HTTP '+r.status+') — لا مشكلة: يعمل الاكتشاف التلقائي بالتجربة','warn');}
+    catch(e){log('• تعذّر قراءة الفهرس: '+e.message,'warn');}
+    // 2) ملفات الأصل
+    let files=[];
+    if(manifest&&manifest.symbols&&manifest.symbols[sym]){
+      const fr=manifest.symbols[sym].frames; Object.keys(fr).forEach(k=>Object.keys(fr[k].periods).forEach(p=>files.push({frame:k,url:'data/'+encodeURIComponent(fr[k].periods[p])})));
+      log('✔ '+sym+' في الفهرس: '+Object.keys(fr).map(k=>k+' ('+fr[k].years.join(', ')+')').join(' | '),'ok');
+    } else {
+      log('• '+sym+' ليس في الفهرس — جارٍ البحث بالأسماء المعتادة DAT_MT_'+sym+'_<فريم>_<سنة>.csv ...');
+      const nowY=new Date().getUTCFullYear();
+      for(const f of FR){ const ys=[]; for(let y=nowY;y>=2000;y--) ys.push(y); const urls=ys.map(y=>'data/DAT_MT_'+sym+'_'+f+'_'+y+'.csv'); const res=[];
+        for(let i=0;i<urls.length;i+=8) res.push(...await Promise.all(urls.slice(i,i+8).map(head)));
+        const hit=urls.filter((u,i)=>res[i].ok); if(hit.length){hit.forEach(u=>files.push({frame:f,url:u}));log('✔ وُجد فريم '+f+': '+hit.map(u=>u.match(/_(\d{4})\.csv/)[1]).sort().join(', '),'ok');break;} }
+      if(!files.length){log('✘ لم يُعثر على أي ملف باسم DAT_MT_'+sym+'_<M1|M5|M15|M30|H1|H4|D1>_<سنة>.csv','bad'); log('  تحقق من: (1) اسم الأصل بالأحرف الكبيرة، (2) أن المجلد اسمه data بحروف صغيرة داخل جذر الموقع، (3) أن الملفات مرفوعة فعلاً وأن GitHub Pages أعاد النشر.','bad'); }
+    }
+    // 3) فحص أول ملف: الحالة والحجم والتنسيق
+    if(files.length){
+      const f=files[files.length-1]; log('فحص أحدث ملف: '+f.url);
+      try{
+        const r=await fetch(f.url,{cache:'no-store'}); log('  HTTP '+r.status+' | Content-Type: '+(r.headers.get('content-type')||'?')+' | الحجم: '+(r.headers.get('content-length')||'؟')+' بايت', r.ok?'ok':'bad');
+        if(r.ok){
+          const reader=r.body.getReader(); let buf=''; const dec=new TextDecoder(); while(buf.split('\n').length<6){const {value,done}=await reader.read(); if(done)break; buf+=dec.decode(value,{stream:true});} reader.cancel();
+          const first=buf.split(/\r?\n/).filter(Boolean).slice(0,3); log('  أول الأسطر:\n    '+first.join('\n    '));
+          if(/^\s*</.test(buf)) log('✘ المحتوى يبدو صفحة HTML لا CSV (غالباً مسار خاطئ أو ملف LFS غير محمَّل).','bad');
+          else if(/^version https:\/\/git-lfs/.test(buf)) log('✘ الملف مؤشّر Git LFS وليس البيانات الفعلية — GitHub Pages لا يخدم ملفات LFS الحقيقية.','bad');
+          else if(first[0]&&RE.test(first[0])) log('✔ التنسيق مطابق لـ HistData MT (YYYY.MM.DD,HH:MM,O,H,L,C,V)','ok');
+          else log('⚠ التنسيق غير مطابق للمتوقع (YYYY.MM.DD,HH:MM,O,H,L,C,V) — أرسل لي أول سطر لأدعمه.','warn');
+        }
+      }catch(e){log('  ✘ فشل الطلب: '+e.message,'bad');}
+    }
+    log('— انتهى —');
+  }
+  document.getElementById('run').onclick=run;
+  document.getElementById('copy').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(lines.map(l=>l.t).join('\n'));
+  const q=new URLSearchParams(location.search).get('symbol'); if(q) document.getElementById('sym').value=q;
+  run();
+})();
+</script></body></html>

@@ -1,0 +1,6 @@
+احذف هذه الملفات من المستودع (نظام الاستيراد اليدوي/IndexedDB والمحلّل القديم):
+  tv-local-data.js
+  tv-data-import.js
+  tests/data-import.test.js
+  tests/local-import.browser.py
+ولا تبقِ أي وسم <script> يشير إليها في index.html (النسخة المرفقة منه نظيفة).

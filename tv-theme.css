@@ -57,8 +57,13 @@ body { background: var(--tv-chart-bg-color, var(--tv-bg)); } /* يتبع لون 
   border-top: 1px solid var(--tv-border) !important;
   border-bottom: none !important;
 }
-.mc-pane-header, .mc-compare-list, .mc-spread-list, #dtOverlay ~ * { background: var(--tv-panel) !important; }
+.mc-pane-header, .mc-compare-list, .mc-spread-list {
+  background: var(--tv-panel) !important;
+}
 
+#dtOverlay {
+  background: transparent !important;
+}
 /* ---------------------------------------------------------- buttons: flat blue instead of purple gradient */
 #dtDrawBtn.active,
 .dt-sm-btn.primary,

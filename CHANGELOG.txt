@@ -1,0 +1,20 @@
+IXVIEW — Floating Drawing Toolbar Redesign
+
+Modified files only:
+- drawing.js
+- drawing.css
+
+UI changes:
+- Replaced emoji toolbar controls with consistent inline outline SVG icons.
+- Redesigned the floating toolbar as a compact TradingView-inspired dark panel.
+- Added visual grip, separators, refined color swatch, width and line-style selectors.
+- Improved hover, active, delete, focus, and small-screen states.
+- Preserved existing action IDs and event handlers for color, settings, lock,
+  hide, bring forward, send backward, clone, and delete.
+
+Validation:
+- JavaScript syntax check passed.
+- All 156 Node unit tests passed.
+- Browser UI tests could not execute because the Playwright Chromium executable
+  is not installed in this environment. No claim of pixel-identical or
+  on-device validation is made.

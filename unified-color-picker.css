@@ -1,0 +1,99 @@
+/* ============ Unified Color Picker — مواصفات IXVIEW (TradingView داكن) ============
+   المرجع 1728×1080: العرض 377، حشوة 20، مربعات 26×26 (مسافة 34.7/35)، زوايا 22.
+   كل القياسات تتناسب مع عرض الشاشة عبر --u (يعرّفه tv-draw-ui.css، وله قيمة احتياطية هنا). */
+.ucp-popup {
+  --u: clamp(.55px, calc(100vw / 1728), 1px);
+  direction: rtl;
+  width: calc(var(--u) * 377);
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #131313;
+  border: 1px solid #2a2a2a;
+  border-radius: calc(var(--u) * 22);
+  padding: calc(var(--u) * 20);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .55), 0 2px 10px rgba(0, 0, 0, .4);
+  z-index: 9000;
+  color: #e6e6e6;
+  font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+  scrollbar-width: thin;
+}
+.ucp-drag-handle { height: calc(var(--u) * 10); margin: calc(var(--u) * -14) calc(var(--u) * -14) calc(var(--u) * 6); cursor: move; }
+
+.ucp-grid, .ucp-custom-row {
+  direction: ltr;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  justify-items: center;
+  row-gap: calc(var(--u) * 9);
+}
+.ucp-custom-row { row-gap: calc(var(--u) * 9); }
+.ucp-swatch {
+  width: calc(var(--u) * 26); height: calc(var(--u) * 26);
+  border-radius: calc(var(--u) * 4);
+  border: 1px solid rgba(255, 255, 255, .07);
+  padding: 0; cursor: pointer; box-sizing: border-box;
+  position: relative;
+}
+.ucp-swatch:hover { transform: scale(1.08); }
+/* حلقة التحديد المزدوجة: أبيض ← أسود ← أبيض */
+.ucp-swatch.selected { box-shadow: 0 0 0 calc(var(--u) * 2) #131313, 0 0 0 calc(var(--u) * 4) #fff; }
+.ucp-sep { height: 1px; background: #454545; margin: calc(var(--u) * 14) 0 calc(var(--u) * 12); }
+.ucp-section-label { color: #929292; font-size: calc(var(--u) * 20); font-weight: 600; margin: 0 0 calc(var(--u) * 12); }
+.ucp-add-btn {
+  grid-column: 1; width: calc(var(--u) * 26); height: calc(var(--u) * 26);
+  border: none; background: transparent; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ucp-add-btn svg { width: calc(var(--u) * 22); height: calc(var(--u) * 22); }
+.ucp-add-btn:hover svg path { stroke: #FF2962; }
+
+.ucp-opacity-row { margin-top: calc(var(--u) * 4); }
+.ucp-opacity-label { color: #929292; font-size: calc(var(--u) * 20); margin-bottom: calc(var(--u) * 12); }
+.ucp-opacity-controls { direction: ltr; display: flex; align-items: center; gap: calc(var(--u) * 16); }
+.ucp-opacity-num {
+  width: calc(var(--u) * 72); height: calc(var(--u) * 40); box-sizing: border-box;
+  border-radius: calc(var(--u) * 10); border: 1.5px solid #434343;
+  background: #000; color: #e6e6e6; font-size: calc(var(--u) * 20); text-align: center;
+}
+.ucp-opacity-slider {
+  flex: 1; max-width: calc(var(--u) * 256);
+  -webkit-appearance: none; appearance: none;
+  height: calc(var(--u) * 14); border-radius: calc(var(--u) * 7);
+  background: linear-gradient(to right, transparent, #000),
+    repeating-conic-gradient(#8a8a8a 0 25%, #c9c9c9 0 50%) 0 0 / 8px 8px;
+  outline: none;
+}
+.ucp-opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: calc(var(--u) * 18); height: calc(var(--u) * 18);
+  border-radius: 50%; background: #fff; border: calc(var(--u) * 4) solid #000; cursor: pointer; box-sizing: border-box;
+}
+.ucp-opacity-slider::-moz-range-thumb {
+  width: calc(var(--u) * 18); height: calc(var(--u) * 18); border-radius: 50%; background: #fff; border: calc(var(--u) * 4) solid #000; box-sizing: border-box;
+}
+
+/* السُّمك ونمط الخط — مجموعات أزرار متلاصقة */
+.ucp-stroke-block { margin-top: calc(var(--u) * 14); }
+.ucp-seg { direction: ltr; display: inline-flex; border: 1.5px solid #535353; border-radius: calc(var(--u) * 10); overflow: hidden; }
+.ucp-seg-btn {
+  height: calc(var(--u) * 48); border: none; border-inline-start: 1px solid #535353; background: #000; color: #e6e6e6;
+  display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+}
+.ucp-seg-btn:first-child { border-inline-start: none; }
+.ucp-seg-width .ucp-seg-btn { width: calc(var(--u) * 85); }
+.ucp-seg-style .ucp-seg-btn { width: calc(var(--u) * 113); }
+.ucp-seg-btn svg { width: 60%; height: auto; }
+.ucp-seg-btn.active { background: #F2F2F2; color: #131313; }
+
+.ucp-main-view.hidden, .ucp-adv-view.hidden { display: none; }
+.ucp-adv-header { direction: ltr; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.ucp-back-btn { width: 30px; height: 30px; border-radius: 8px; border: none; background: #222; color: #e6e6e6; cursor: pointer; flex-shrink: 0; }
+.ucp-hex-wrap { flex: 1; display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 8px; background: #000; border: 1.5px solid #434343; color: #929292; font-size: 13px; }
+.ucp-hex-input { border: none; outline: none; background: transparent; color: #e6e6e6; font-size: 13px; width: 100%; }
+.ucp-preview { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #434343; flex-shrink: 0; }
+.ucp-confirm-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: none; background: #F2F2F2; color: #131313; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+.ucp-sv-square { position: relative; width: 100%; height: 130px; border-radius: 8px; margin-bottom: 10px; background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); cursor: crosshair; }
+.ucp-sv-cursor { position: absolute; width: 14px; height: 14px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,.6); transform: translate(-50%, -50%); pointer-events: none; }
+.ucp-hue-slider { position: relative; width: 100%; height: 14px; border-radius: 7px; background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red); cursor: pointer; }
+.ucp-hue-thumb { position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid #000; box-sizing: border-box; transform: translate(-50%, -50%); pointer-events: none; }

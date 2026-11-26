@@ -1,0 +1,140 @@
+/* =========================================================================
+   tv-topbar.css — الشريط العلوي (الوضع الفاتح، RTL، مرجع 1728×1080)
+   كل القياسات = قيمة المرجع × --tb-u (يضبطها Tv-topbar.js حسب عرض الشاشة).
+   يُحمَّل بعد tv-theme.css ليغلب قواعد الشريط القديم.
+   ========================================================================= */
+:root { --tb-u: 1; --tv-header-height: 57px; }
+.ix-u { --p: calc(var(--tb-u) * 1px); }
+
+#ixTopBar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: calc(57 * var(--tb-u) * 1px);
+  box-sizing: border-box;
+  background: #FFFFFF; border-bottom: calc(5 * var(--tb-u) * 1px) solid #EBEBEB;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+  color: #131722; direction: ltr; user-select: none; -webkit-user-select: none;
+}
+#ixTopBar::-webkit-scrollbar { display: none; }
+#ixBarInner { position: relative; height: calc(52 * var(--tb-u) * 1px); width: calc(1728 * var(--tb-u) * 1px); }
+
+#ixTopBar .ix-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: calc(36 * var(--tb-u) * 1px); min-width: 0; padding: 0; margin: 0;
+  display: flex; align-items: center; justify-content: center; gap: calc(12 * var(--tb-u) * 1px);
+  border: none; border-radius: calc(18 * var(--tb-u) * 1px); background: transparent !important;
+  color: #131722 !important; cursor: pointer; font: inherit;
+  font-size: max(12px, calc(18 * var(--tb-u) * 1px)); white-space: nowrap; box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+#ixTopBar .ix-btn:hover, #ixTopBar .ix-btn.ix-open, #ixTopBar .ix-btn:active { background: #EEEEEE !important; }
+#ixTopBar .ix-btn:focus-visible { outline: 2px solid #2962FF; outline-offset: -2px; }
+#ixTopBar .ix-btn svg { flex: none; display: block; }
+#ixTopBar .ix-btn.ix-disabled { color: #818181 !important; cursor: default; }
+#ixTopBar .ix-btn.ix-disabled:hover { background: transparent !important; }
+#ixTopBar .ix-btn.ix-on { background: #EEEEEE !important; }
+#ixTopBar .ix-sep {
+  position: absolute; top: calc(12 * var(--tb-u) * 1px); width: 1px; height: calc(28 * var(--tb-u) * 1px); background: #EAEAEA;
+}
+#ixTopBar .ix-avatar {
+  width: calc(34 * var(--tb-u) * 1px); height: calc(34 * var(--tb-u) * 1px); border-radius: 50%;
+  background: #2EA36A !important; color: #fff !important;
+  font-weight: 600; font-size: max(13px, calc(22 * var(--tb-u) * 1px));
+}
+#ixTopBar .ix-avatar:hover { background: #2EA36A !important; filter: brightness(.94); }
+#ixTopBar [data-ix="tf"] span { direction: rtl; unicode-bidi: isolate; }
+#ixTopBar .ix-fmtname { flex-direction: column; align-items: flex-end; gap: 0; justify-content: center; border-radius: calc(10 * var(--tb-u) * 1px); line-height: 1.1; }
+#ixTopBar .ix-fmtname .n { font-size: max(12px, calc(20 * var(--tb-u) * 1px)); max-width: calc(110 * var(--tb-u) * 1px); overflow: hidden; text-overflow: ellipsis; }
+#ixTopBar .ix-fmtname .s { font-size: max(9px, calc(13 * var(--tb-u) * 1px)); color: #2962FF; }
+#ixTopBar .ix-replay.ix-on { background: #222222 !important; color: #fff !important; }
+#ixTopBar .ix-capsule { background: #EBEBEB !important; border-radius: calc(18 * var(--tb-u) * 1px); padding: 0; gap: 0; overflow: hidden; }
+#ixTopBar .ix-capsule .cap-ic, #ixTopBar .ix-capsule .cap-txt {
+  height: 100%; border: none; background: transparent; color: inherit; font: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#ixTopBar .ix-capsule .cap-ic { width: 34%; }
+#ixTopBar .ix-capsule .cap-txt { flex: 1; font-weight: 600; font-size: max(11px, calc(17 * var(--tb-u) * 1px)); }
+#ixTopBar .ix-capsule .cap-ic:hover, #ixTopBar .ix-capsule .cap-txt:hover { background: #E2E2E2; }
+#ixTopBar .ix-dis svg { opacity: .55; }
+
+/* الحاوية القديمة #tvTopBar: صارت لوحة "أدوات إضافية" تحمل أزرار الوحدات الأخرى (رسم، باكتيست، تداول...) */
+body #tvTopBar {
+  display: none !important; position: fixed !important; top: calc(60 * var(--tb-u) * 1px) !important; left: calc(80 * var(--tb-u) * 1px) !important; right: auto !important;
+  width: max-content !important; max-width: calc(100vw - 16px) !important; height: auto !important; min-height: 0 !important;
+  flex-direction: column !important; align-items: stretch !important; gap: 4px !important; padding: 8px !important;
+  background: #fff !important; border: none !important; border-radius: 12px !important; z-index: 5000 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.08) !important; overflow: auto !important; max-height: calc(100vh - 80px);
+}
+body #tvTopBar.ix-open { display: flex !important; }
+body #tvTopBar button { transform: none !important; color: #131722 !important; text-align: right; }
+body #tvTopBar button:hover { background: #F0F0F0 !important; }
+
+/* ---------- القوائم والنوافذ المنسدلة ---------- */
+.ix-menu {
+  position: fixed; z-index: 5000; background: #FFFFFF; direction: rtl; text-align: right;
+  border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.08);
+  padding: 8px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif; color: #131722;
+  max-width: calc(100vw - 16px); -webkit-overflow-scrolling: touch; touch-action: pan-y;
+}
+.ix-row {
+  display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 12px; margin: 1px 0; border-radius: 10px;
+  cursor: pointer; font-size: 15px; box-sizing: border-box; border: none; background: transparent; width: 100%; text-align: right; color: inherit; font-family: inherit;
+}
+.ix-row:hover { background: #F0F0F0; }
+.ix-row.sel { background: #222222; color: #fff; }
+.ix-row.sel .sub, .ix-row.sel .key { color: #D0D0D0; }
+.ix-row.off { opacity: .45; cursor: not-allowed; }
+.ix-row .ic { flex: none; width: 26px; height: 26px; display: flex; }
+.ix-row .tx { flex: 1; min-width: 0; }
+.ix-row .tt { font-size: 15px; font-weight: 500; }
+.ix-row .sub { font-size: 12.5px; color: #8A8A8A; margin-top: 2px; line-height: 1.35; white-space: normal; }
+.ix-row .key { color: #8A8A8A; font-size: 13px; direction: ltr; }
+.ix-row.big { min-height: 70px; align-items: flex-start; padding-top: 12px; }
+.ix-sec { color: #8A8A8A; font-size: 13px; padding: 10px 12px 4px; }
+.ix-sec.fold { cursor: pointer; display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 6px 12px; }
+.ix-div { height: 1px; background: #EBEBEB; margin: 6px 0; }
+.ix-empty { color: #8A8A8A; font-size: 13px; padding: 10px 12px 14px; line-height: 1.6; white-space: normal; }
+.ix-tog { flex: none; width: 52px; height: 26px; border-radius: 13px; background: #A8A8A8; position: relative; transition: background .15s; }
+.ix-tog::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; }
+.ix-tog.on { background: #252525; }
+.ix-tog.on::after { left: 29px; }
+.ix-seg { display: flex; background: #F0F0F0; border-radius: 10px; padding: 3px; margin: 4px 4px 6px; }
+.ix-seg button { flex: 1; height: 34px; border: none; border-radius: 8px; background: transparent; color: #8A8A8A; font: inherit; font-size: 14px; cursor: pointer; }
+.ix-seg button.act { background: #fff; color: #131722; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.ix-lay-row { display: flex; align-items: center; gap: 6px; min-height: 56px; border-bottom: 1px solid #EBEBEB; padding: 0 8px; }
+.ix-lay-row .cnt { width: 34px; color: #8A8A8A; font-size: 15px; text-align: center; flex: none; }
+.ix-lay-item { width: 38px; height: 38px; border: none; border-radius: 8px; background: transparent; color: #131722; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.ix-lay-item:hover { background: #EEEEEE; }
+.ix-lay-item.cur { background: #222222; color: #fff; }
+.ix-tf-row { display: flex; align-items: center; min-height: 42px; padding: 0 12px; border-radius: 10px; cursor: pointer; font-size: 15px; gap: 10px; }
+.ix-tf-row:hover { background: #F0F0F0; }
+.ix-tf-row.cur { background: #222222; color: #fff; }
+.ix-tf-row.off { opacity: .4; cursor: not-allowed; }
+.ix-tf-row .st, .ix-tf-row .rm { width: 22px; height: 22px; border: none; background: transparent; color: #A8A8A8; padding: 0; cursor: pointer; display: flex; }
+.ix-tf-row .st.on { color: #F5B301; } .ix-tf-row .st.on svg { fill: currentColor; }
+.ix-tf-row.cur .st { color: #fff; }
+.ix-tf-row .lbl { flex: 1; text-align: right; }
+
+/* ---------- تلميح ---------- */
+#ixToast {
+  position: fixed; left: 50%; bottom: 8%; transform: translateX(-50%); z-index: 9600; display: none;
+  background: #222222; color: #fff; border-radius: 14px; padding: 16px 22px; font-size: 16px; direction: rtl; align-items: center; gap: 12px;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif; max-width: min(420px, calc(100vw - 24px)); box-shadow: 0 6px 24px rgba(0,0,0,.3);
+}
+#ixToast.show { display: flex; }
+#ixToast .tic { width: 26px; height: 26px; border-radius: 7px; background: #2962FF; flex: none; display: flex; align-items: center; justify-content: center; }
+#ixToast.err .tic { background: #F3224E; }
+
+/* ---------- نافذة معلومات (ميزة غير مدعومة) ---------- */
+.ix-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 8500; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.ix-modal {
+  background: #fff; border-radius: 14px; width: min(560px, 100%); max-height: calc(100vh - 24px); overflow: auto; padding: 24px; direction: rtl; text-align: right; box-sizing: border-box;
+  box-shadow: 0 16px 48px rgba(0,0,0,.25); font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif; color: #131722;
+}
+.ix-modal h3 { margin: 0 0 10px; font-size: 20px; }
+.ix-modal p { margin: 0 0 18px; font-size: 15px; line-height: 1.7; color: #333; }
+.ix-modal .ok { height: 44px; padding: 0 28px; border: none; border-radius: 12px; background: #242424; color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+
+/* الشاشات الأصغر: الشريط قابل للتمرير أفقياً بدلاً من تراكب الأزرار */
+@media (hover: none) { #ixTopBar { -webkit-overflow-scrolling: touch; } }

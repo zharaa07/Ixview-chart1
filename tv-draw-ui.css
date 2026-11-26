@@ -1,0 +1,258 @@
+/* =========================================================================
+   tv-draw-ui.css — الشريط العائم ونوافذ إعدادات الرسم (IXVIEW / TradingView، RTL داكن)
+   المرجع النسبي 1728×1080: كل القياسات = رقم المواصفات × --u حيث
+   --u = عرض الشاشة / 1728 (بحد أدنى .55px وأقصى 1px) فتتكيف الواجهة دون تشويه.
+   خلفية الشارت لا تتأثر: العناصر الداكنة طافية فقط.
+   ========================================================================= */
+:root {
+  --dt-u: clamp(.55px, calc(100vw / 1728), 1px);
+  --dt-bar: #111111;
+  --dt-win: #000000;
+  --dt-pop: #131313;
+  --dt-line: #434343;
+  --dt-line2: #303030;
+  --dt-track: #474747;
+  --dt-white: #F2F2F2;
+  --dt-text: #E6E6E6;
+  --dt-label: #BEBEBE;
+  --dt-muted: #929292;
+  --dt-icon: #A3A3A3;
+  --dt-blue: #2962FF;
+  --dt-dis-bg: #1A1A1A;
+  --dt-dis-tx: #4A4A4A;
+  --dt-font: "IBM Plex Sans Arabic", "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+}
+.dtc-capsule, .dto-bar, .dtt-toast, .dtsw-win, .dtm-menu, .dtt-flash { font-family: var(--dt-font); }
+.hidden.dtc-capsule, .dtc-capsule.hidden, .dto-bar.hidden, .dtt-toast.hidden, .dtsw-overlay.hidden, .dtx-cross.hidden { display: none !important; }
+
+/* ------------------------------- 1) الكبسولة الرئيسية ------------------------------- */
+.dtc-capsule {
+  position: fixed; z-index: 4500; box-sizing: border-box;
+  display: flex; align-items: center; direction: ltr;
+  height: calc(var(--dt-u) * 59); padding: 0 calc(var(--dt-u) * 13.5) 0 0;
+  max-width: calc(100vw - 8px);
+  background: var(--dt-bar); border-radius: calc(var(--dt-u) * 13);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .35), 0 1px 4px rgba(0, 0, 0, .3);
+  user-select: none; -webkit-user-select: none; touch-action: none;
+}
+.dtc-tools { display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.dtc-tools::-webkit-scrollbar { display: none; }
+.dtc-btn {
+  flex: 0 0 auto; width: calc(var(--dt-u) * 58); height: calc(var(--dt-u) * 59);
+  padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent !important; box-shadow: none;
+  color: var(--dt-icon); display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: color .12s;
+}
+.dtc-btn svg { width: calc(var(--dt-u) * 40); height: calc(var(--dt-u) * 40); max-width: 100%; stroke-width: 1.45; }
+.dtc-btn:hover { color: #D2D2D2; background: transparent !important; }
+.dtc-btn.active, .dtc-btn.active:hover { color: var(--dt-blue); }
+.dtc-btn:focus-visible { outline: 2px solid var(--dt-blue); outline-offset: -4px; border-radius: 10px; }
+.dtc-grip {
+  flex: 0 0 auto; width: calc(var(--dt-u) * 11); height: calc(var(--dt-u) * 59); margin-inline-start: calc(var(--dt-u) * 8.5);
+  display: grid; grid-template-columns: repeat(2, calc(var(--dt-u) * 4)); grid-auto-rows: calc(var(--dt-u) * 4);
+  gap: calc(var(--dt-u) * 3); align-content: center; justify-content: center; cursor: grab; touch-action: none;
+}
+.dtc-grip i { width: calc(var(--dt-u) * 4); height: calc(var(--dt-u) * 4); min-width: 3px; min-height: 3px; border-radius: 50%; background: #5A5A5A; }
+.dtc-capsule.dragging .dtc-grip { cursor: grabbing; }
+
+/* ------------------------------- 2) شريحة التعليمات + المؤشر ------------------------------- */
+.dtt-toast {
+  position: fixed; z-index: 4600; top: calc(var(--dt-u) * 12); left: calc(var(--dt-u) * 12);
+  height: calc(var(--dt-u) * 58); box-sizing: border-box; padding: 0 calc(var(--dt-u) * 12);
+  display: flex; align-items: center; gap: calc(var(--dt-u) * 14); direction: rtl;
+  max-width: calc(100vw - 24px);
+  background: #000; color: #fff; border-radius: calc(var(--dt-u) * 14); box-shadow: 0 6px 22px rgba(0, 0, 0, .4);
+  font-size: calc(var(--dt-u) * 24); font-weight: 500;
+}
+.dtt-toast .dtt-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtt-count { background: #CFCFCF; color: #111; border-radius: calc(var(--dt-u) * 12); padding: calc(var(--dt-u) * 5) calc(var(--dt-u) * 12); font-size: calc(var(--dt-u) * 22); white-space: nowrap; }
+.dtt-cancel { width: calc(var(--dt-u) * 38); height: calc(var(--dt-u) * 38); padding: 0; border: 0; background: transparent !important; color: #D0D0D0; cursor: pointer; display: flex; align-items: center; justify-content: center; order: 3; }
+.dtt-cancel svg { width: 100%; height: 100%; }
+.dtt-cancel:hover { color: #fff; }
+.dtt-flash { position: fixed; z-index: 9500; bottom: 70px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 10px 18px; font-size: 14px; transition: opacity .4s; direction: rtl; }
+.dtt-flash.out { opacity: 0; }
+.dtt-inline { position: fixed; z-index: 7000; min-width: 120px; max-width: 60vw; background: rgba(0, 0, 0, .75); color: #fff; border: 1px solid var(--dt-blue); border-radius: 6px; padding: 4px 8px; font-family: var(--dt-font); resize: none; outline: none; }
+.dt-tool-active, .dt-tool-active * { cursor: none !important; }
+.dtx-cross { position: absolute; inset: 0; pointer-events: none; z-index: 6; }
+.dtx-cross .dtx-h, .dtx-cross .dtx-v { position: absolute; background: none; }
+.dtx-cross .dtx-h { left: 0; right: 0; top: var(--y, 0); height: 0; border-top: 1px dashed var(--dt-blue); }
+.dtx-cross .dtx-v { top: 0; bottom: 0; left: var(--x, 0); width: 0; border-left: 1px dashed var(--dt-blue); }
+.dtx-cross .dtx-dot { position: absolute; left: var(--x, 0); top: var(--y, 0); width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--dt-blue); }
+
+/* ------------------------------- 3) شريط خصائص الكائن ------------------------------- */
+.dto-bar {
+  position: fixed; z-index: 4700; box-sizing: border-box; display: flex; align-items: center; direction: ltr;
+  height: calc(var(--dt-u) * 58); padding: 0 calc(var(--dt-u) * 14);
+  max-width: calc(100vw - 8px); overflow-x: auto; scrollbar-width: none;
+  background: var(--dt-bar); border-radius: calc(var(--dt-u) * 13);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .35), 0 1px 4px rgba(0, 0, 0, .3);
+  user-select: none; -webkit-user-select: none;
+}
+.dto-bar::-webkit-scrollbar { display: none; }
+.dto-btn {
+  position: relative; flex: 0 0 auto; width: calc(var(--dt-u) * 57.5); height: calc(var(--dt-u) * 58); min-width: 30px;
+  padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent !important; box-shadow: none;
+  color: var(--dt-icon); display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: var(--dt-font);
+}
+.dto-btn svg { width: calc(var(--dt-u) * 34); height: calc(var(--dt-u) * 34); min-width: 18px; min-height: 18px; stroke-width: 1.45; }
+.dto-btn:hover { color: #E0E0E0; background: transparent !important; }
+.dto-btn.on { color: var(--dt-blue); }
+.dto-btn.wide { width: calc(var(--dt-u) * 66); }
+.dto-btn.wide .dto-sample { width: calc(var(--dt-u) * 34); height: calc(var(--dt-u) * 16); }
+.dto-btn.text span { font-size: calc(var(--dt-u) * 24); color: var(--dt-text); min-width: 1.6em; text-align: center; }
+.dto-btn.colored { flex-direction: column; justify-content: center; gap: calc(var(--dt-u) * 3); }
+.dto-btn.colored svg { width: calc(var(--dt-u) * 30); height: calc(var(--dt-u) * 30); }
+.dto-btn.colored u { display: block; width: calc(var(--dt-u) * 28); height: calc(var(--dt-u) * 4); min-height: 3px; border-radius: 2px; background: #000; box-shadow: 0 0 0 1px #3a3a3a; }
+.dto-btn:focus-visible { outline: 2px solid var(--dt-blue); outline-offset: -4px; }
+.dto-grip { flex: 0 0 auto; width: calc(var(--dt-u) * 36); height: calc(var(--dt-u) * 58); margin-inline-start: calc(var(--dt-u) * 6); display: grid; grid-template-columns: repeat(2, calc(var(--dt-u) * 4)); grid-auto-rows: calc(var(--dt-u) * 4); gap: calc(var(--dt-u) * 4); align-content: center; justify-content: center; }
+.dto-grip i { width: calc(var(--dt-u) * 4); height: calc(var(--dt-u) * 4); min-width: 3px; min-height: 3px; border-radius: 50%; background: #5A5A5A; }
+
+/* قوائم منبثقة صغيرة (المزيد/القوالب/الحجم/النهايات) */
+.dtm-menu { position: fixed; z-index: 9100; min-width: calc(var(--dt-u) * 220); max-width: 90vw; max-height: 70vh; overflow-y: auto; padding: calc(var(--dt-u) * 8); background: var(--dt-pop); border: 1px solid #2a2a2a; border-radius: calc(var(--dt-u) * 18); box-shadow: 0 18px 50px rgba(0, 0, 0, .55); color: var(--dt-text); direction: rtl; scrollbar-width: thin; }
+.dtm-menu.compact { min-width: calc(var(--dt-u) * 120); }
+.dtm-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box; min-height: calc(var(--dt-u) * 46); padding: 0 calc(var(--dt-u) * 16); border: 0; border-radius: calc(var(--dt-u) * 10); background: transparent !important; color: var(--dt-text); font: inherit; font-size: max(13px, calc(var(--dt-u) * 22)); text-align: right; cursor: pointer; }
+.dtm-item:hover { background: #222 !important; }
+.dtm-item.on { background: #2a2a2a !important; }
+.dtm-item.danger { color: #FF6B6B; }
+.dtm-item small { color: var(--dt-muted); }
+.dtm-sep { height: 1px; background: #353535; margin: 6px 4px; }
+.dtm-form { display: flex; gap: 8px; padding: 6px 4px 2px; }
+.dtm-input { flex: 1; min-width: 0; height: calc(var(--dt-u) * 44); box-sizing: border-box; background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line); border-radius: calc(var(--dt-u) * 10); padding: 0 10px; font: inherit; font-size: 13px; }
+.dtm-input:focus { border-color: var(--dt-blue); outline: none; }
+.dtm-save { height: calc(var(--dt-u) * 44); padding: 0 12px; border: 0; border-radius: calc(var(--dt-u) * 10); background: var(--dt-white); color: #111; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+/* لوحة الألوان: وضع السمك/النمط فقط (أزرار شريط الخصائص) */
+.ucp-popup.ucp-stroke-only .ucp-grid, .ucp-popup.ucp-stroke-only .ucp-custom-row, .ucp-popup.ucp-stroke-only .ucp-section-label,
+.ucp-popup.ucp-stroke-only .ucp-opacity-row, .ucp-popup.ucp-stroke-only .ucp-sep, .ucp-popup.ucp-stroke-only .ucp-main-view { display: none; }
+.ucp-popup.ucp-stroke-only { width: auto; padding: calc(var(--u, 1px) * 16); }
+.ucp-popup.ucp-stroke-only .ucp-stroke-block:first-of-type { margin-top: 0; }
+
+/* ------------------------------- 4) نافذة الإعدادات ------------------------------- */
+.dtsw-overlay { position: fixed; inset: 0; z-index: 8000; pointer-events: none; display: block; }
+.dtsw-win {
+  --u: var(--dt-u);
+  pointer-events: auto; position: absolute; top: calc(var(--dt-u) * 31); left: 50%; transform: translateX(-50%);
+  box-sizing: border-box; width: calc(var(--dt-u) * 577); max-width: calc(100vw - 16px);
+  min-height: calc(var(--dt-u) * 380); max-height: calc(100vh - var(--dt-u) * 110);
+  display: flex; flex-direction: column; direction: rtl;
+  background: var(--dt-win); color: var(--dt-text); border: 1px solid #1d1d1d; border-radius: calc(var(--dt-u) * 26);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55), 0 6px 24px rgba(0, 0, 0, .45);
+  padding: 0 calc(var(--dt-u) * 30); overflow: hidden; font-size: calc(var(--dt-u) * 25);
+}
+.dtsw-header { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding-top: calc(var(--dt-u) * 28); padding-bottom: calc(var(--dt-u) * 22); cursor: move; min-height: calc(var(--dt-u) * 35); }
+.dtsw-title-wrap { display: flex; align-items: center; gap: calc(var(--dt-u) * 12); min-width: 0; }
+.dtsw-title { font-size: max(15px, calc(var(--dt-u) * 36)); font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtsw-title-input { width: calc(var(--dt-u) * 300); max-width: 100%; box-sizing: border-box; background: #000; color: #fff; border: 1.5px solid var(--dt-blue); border-radius: calc(var(--dt-u) * 12); padding: 4px 10px; font: inherit; font-size: max(15px, calc(var(--dt-u) * 30)); }
+.dtsw-edit, .dtsw-close { padding: 0; border: 0; background: transparent !important; color: var(--dt-icon); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dtsw-edit { width: calc(var(--dt-u) * 26); height: calc(var(--dt-u) * 26); min-width: 16px; min-height: 16px; }
+.dtsw-close { width: calc(var(--dt-u) * 30); height: calc(var(--dt-u) * 30); min-width: 20px; min-height: 20px; }
+.dtsw-edit svg, .dtsw-close svg { width: 100%; height: 100%; }
+.dtsw-edit:hover, .dtsw-close:hover { color: #fff; }
+.dtsw-tabs-wrap { flex: 0 0 auto; }
+.dtsw-tabs { display: flex; gap: calc(var(--dt-u) * 32); }
+.dtsw-tab { padding: 0 0 calc(var(--dt-u) * 12); margin: 0; border: 0; border-radius: 0; background: transparent !important; color: var(--dt-label); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); font-weight: 500; cursor: pointer; white-space: nowrap; }
+.dtsw-tab:hover { color: #fff; }
+.dtsw-tab.active { color: #fff; background: transparent !important; }
+.dtsw-track { position: relative; height: calc(var(--dt-u) * 6); min-height: 3px; background: var(--dt-track); border-radius: 99px; margin-top: calc(var(--dt-u) * 2); direction: rtl; }
+.dtsw-ind { position: absolute; top: 0; right: 0; height: 100%; width: 0; background: #F3F3F3; border-radius: 99px; transform: translateX(0); transition: transform .2s ease, width .2s ease; }
+.dtsw-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: calc(var(--dt-u) * 22) 0 calc(var(--dt-u) * 12); scrollbar-width: thin; scrollbar-color: #555 transparent; }
+.dtsw-body::-webkit-scrollbar { width: 6px; }
+.dtsw-body::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 99px; }
+.dtsw-footer { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-start; gap: calc(var(--dt-u) * 18); padding: calc(var(--dt-u) * 20) 0 calc(var(--dt-u) * 28); }
+.dtsw-btn { height: calc(var(--dt-u) * 52); min-height: 36px; min-width: calc(var(--dt-u) * 84); padding: 0 calc(var(--dt-u) * 18); box-sizing: border-box; border-radius: calc(var(--dt-u) * 14); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); font-weight: 600; cursor: pointer; background: #000; color: #fff; border: 2px solid #D9D9D9; }
+.dtsw-btn.primary { background: var(--dt-white); color: #111; border-color: var(--dt-white); min-width: calc(var(--dt-u) * 103); }
+.dtsw-btn:hover { filter: brightness(1.12); }
+.dtsw-tpl { margin-inline-end: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: calc(var(--dt-u) * 151); min-width: 96px; height: calc(var(--dt-u) * 52); min-height: 36px; box-sizing: border-box; padding: 0 calc(var(--dt-u) * 14); border: 1.5px solid var(--dt-line); border-radius: calc(var(--dt-u) * 14); background: #000 !important; color: var(--dt-text); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); cursor: pointer; }
+.dtsw-tpl svg { width: 16px; height: 16px; }
+.dtsw-win button:focus-visible, .dtsw-win select:focus-visible, .dtsw-win input:focus-visible, .dtsw-win textarea:focus-visible { outline: 2px solid var(--dt-blue); outline-offset: 2px; }
+/* ترتيب التذييل: قالب (يمين) ← إلغاء ← موافق (أقصى اليسار) في RTL: DOM = قالب، إلغاء، موافق */
+.dtsw-footer { flex-direction: row; }
+.dtsw-footer .dtsw-tpl { order: 3; }
+.dtsw-footer #dtSmCancel { order: 2; }
+.dtsw-footer #dtSmOk { order: 1; }
+.dtsw-footer { justify-content: flex-start; }
+
+/* ------------------------------- حقول مشتركة داخل النافذة ------------------------------- */
+.dts-wrap { display: flex; flex-direction: column; gap: calc(var(--dt-u) * 26); }
+.dts-row { display: flex; align-items: center; justify-content: space-between; gap: calc(var(--dt-u) * 16); min-height: calc(var(--dt-u) * 52); }
+.dts-label { color: var(--dt-label); font-size: max(13px, calc(var(--dt-u) * 25)); flex: 0 1 auto; }
+.dts-ctrls { display: flex; align-items: center; gap: calc(var(--dt-u) * 13); direction: ltr; justify-content: flex-start; flex: 1 1 auto; }
+.dts-section { color: var(--dt-muted); font-size: max(12px, calc(var(--dt-u) * 22)); margin-top: calc(var(--dt-u) * 6); }
+.dts-swatch { position: relative; flex: 0 0 auto; width: calc(var(--dt-u) * 52); height: calc(var(--dt-u) * 52); min-width: 30px; min-height: 30px; box-sizing: border-box; padding: calc(var(--dt-u) * 6); border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 12); background: #000 !important; cursor: pointer; }
+.dts-swatch i { display: block; width: 100%; height: 100%; border-radius: calc(var(--dt-u) * 6); border: 1px solid rgba(255,255,255,.12); box-sizing: border-box; }
+.dts-swatch.checker i { background: repeating-conic-gradient(#8a8a8a 0 25%, #bdbdbd 0 50%) 0 0 / 10px 10px !important; opacity: 1 !important; }
+.dts-swatch:hover, .dts-swatch:focus-visible { border-color: var(--dt-blue); }
+.dts-check { flex: 0 0 auto; width: calc(var(--dt-u) * 28); height: calc(var(--dt-u) * 28); min-width: 20px; min-height: 20px; padding: 0; box-sizing: border-box; border: 1.5px solid #5a5a5a; border-radius: calc(var(--dt-u) * 6); background: transparent !important; color: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.dts-check svg { width: 80%; height: 80%; stroke-width: 3; }
+.dts-check.on { background: #fff !important; border-color: #fff; color: #000; }
+.dts-select { position: relative; display: flex; align-items: center; width: calc(var(--dt-u) * 151); min-width: 96px; flex: 0 0 auto; }
+.dts-select.wide { width: calc(var(--dt-u) * 190); min-width: 130px; }
+.dts-select select { width: 100%; height: calc(var(--dt-u) * 52); min-height: 36px; box-sizing: border-box; appearance: none; -webkit-appearance: none; background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line); border-radius: calc(var(--dt-u) * 13); padding: 0 calc(var(--dt-u) * 40) 0 calc(var(--dt-u) * 14); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); direction: rtl; cursor: pointer; }
+.dts-select select:focus { border-color: var(--dt-blue); outline: none; }
+.dts-select svg { position: absolute; left: calc(var(--dt-u) * 12); top: 50%; width: 16px; height: 16px; margin-top: -8px; pointer-events: none; color: var(--dt-icon); }
+.dts-select select option { background: #111; color: #eee; }
+.dts-input { width: calc(var(--dt-u) * 135); min-width: 70px; height: calc(var(--dt-u) * 46); min-height: 34px; box-sizing: border-box; background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line); border-radius: calc(var(--dt-u) * 12); padding: 0 8px; font: inherit; font-size: max(13px, calc(var(--dt-u) * 24)); text-align: center; }
+.dts-input:focus { border-color: var(--dt-blue); outline: none; }
+.dts-iconseg { display: flex; gap: calc(var(--dt-u) * 10); }
+.dts-iconbtn { width: calc(var(--dt-u) * 52); height: calc(var(--dt-u) * 52); min-width: 32px; min-height: 32px; box-sizing: border-box; padding: 0; border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 12); background: #000 !important; color: var(--dt-text); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.dts-iconbtn svg { width: 70%; height: 70%; }
+.dts-iconbtn.sel, .dts-iconbtn:hover { border-color: var(--dt-blue); }
+.dts-toolsrow { display: flex; align-items: center; gap: calc(var(--dt-u) * 13); direction: ltr; margin-bottom: calc(var(--dt-u) * 22); justify-content: flex-start; }
+.dts-toolsrow .dts-select { order: 2; } .dts-toolsrow .dts-fmt { order: 1; } .dts-toolsrow .dts-swatch { order: 3; margin-inline-start: auto; }
+.dts-fmt { display: flex; gap: calc(var(--dt-u) * 13); }
+.dts-fmtbtn { width: calc(var(--dt-u) * 50); height: calc(var(--dt-u) * 52); min-width: 32px; min-height: 36px; box-sizing: border-box; padding: 0; border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 12); background: #000 !important; color: var(--dt-text); font: inherit; font-size: calc(var(--dt-u) * 26); cursor: pointer; }
+.dts-fmtbtn.bold { font-weight: 800; } .dts-fmtbtn.italic { font-style: italic; font-family: Georgia, serif; }
+.dts-fmtbtn.on { background: #6b6b6b !important; color: #fff; border-color: #6b6b6b; }
+.dts-textarea { display: block; width: 100%; box-sizing: border-box; height: calc(var(--dt-u) * 150); min-height: 80px; resize: vertical; background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 14); padding: calc(var(--dt-u) * 16); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); direction: auto; margin-bottom: calc(var(--dt-u) * 24); }
+.dts-textarea.tall { height: calc(var(--dt-u) * 230); }
+.dts-textarea::placeholder { color: var(--dt-muted); }
+.dts-textarea:focus { border-color: var(--dt-blue); outline: none; }
+/* جدول فيبوناتشي */
+.dts-levels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: calc(var(--dt-u) * 11) calc(var(--dt-u) * 20); direction: rtl; }
+.dts-level { display: flex; align-items: center; gap: calc(var(--dt-u) * 13); }
+.dts-level { min-width: 0; }
+.dts-level .dts-input { flex: 1 1 0; width: 0; min-width: 0; }
+.dts-level .dts-swatch { width: calc(var(--dt-u) * 46); height: calc(var(--dt-u) * 46); }
+.dts-level.off .dts-input { background: var(--dt-dis-bg); color: var(--dt-dis-tx); border-color: #2a2a2a; }
+.dts-level.off .dts-swatch { opacity: .45; }
+.dts-onecolor { align-self: flex-start; display: flex; align-items: center; gap: calc(var(--dt-u) * 14); padding: 0; border: 0; background: transparent !important; color: var(--dt-label); font: inherit; font-size: max(13px, calc(var(--dt-u) * 25)); cursor: pointer; }
+.dts-diag { width: calc(var(--dt-u) * 50); height: calc(var(--dt-u) * 50); min-width: 28px; min-height: 28px; border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 10); background: linear-gradient(135deg, #14A97F 50%, #E12146 50%); }
+
+/* عناصر التبويبات القديمة المعاد استخدامها (إحداثيات/الظهور/مدخلات) داخل النافذة الجديدة */
+.dtsw-win .dt-sm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(var(--dt-u) * 13) 0; border: 0; min-height: calc(var(--dt-u) * 52); }
+.dtsw-win .dt-sm-row-label { color: var(--dt-label) !important; font-size: max(13px, calc(var(--dt-u) * 25)); flex: 1 1 auto; text-align: right; }
+.dtsw-win .dt-sm-input { background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line); border-radius: calc(var(--dt-u) * 12); height: calc(var(--dt-u) * 46); min-height: 34px; padding: 0 8px; box-sizing: border-box; max-width: calc(var(--dt-u) * 190); width: calc(var(--dt-u) * 150); font: inherit; font-size: max(13px, calc(var(--dt-u) * 24)); }
+.dtsw-win select.dt-sm-input { direction: rtl; }
+.dtsw-win .dt-sm-input:focus, .dtsw-win .dt-sm-textarea:focus { outline: none; border-color: var(--dt-blue); }
+.dtsw-win .dt-sm-checkbox { width: calc(var(--dt-u) * 28); height: calc(var(--dt-u) * 28); min-width: 20px; min-height: 20px; border: 1.5px solid #5a5a5a; border-radius: calc(var(--dt-u) * 6); background: transparent; padding: 0; position: relative; }
+.dtsw-win .dt-sm-checkbox.checked { background: #fff !important; border-color: #fff; }
+.dtsw-win .dt-sm-checkbox.checked:after { content: "✓"; color: #000; position: absolute; inset: 0; display: grid; place-items: center; font-size: 15px; font-weight: 800; }
+.dtsw-win .dt-sm-color-sw { width: calc(var(--dt-u) * 52); height: calc(var(--dt-u) * 52); min-width: 30px; min-height: 30px; border-radius: calc(var(--dt-u) * 12); border: 1.5px solid var(--dt-line2); }
+.dtsw-win .dt-sm-textarea { background: #000; color: var(--dt-text); border: 1.5px solid var(--dt-line2); border-radius: calc(var(--dt-u) * 14); }
+.dtsw-win .dt-info-range-row { border-color: #1d1d1d; }
+.dtsw-win .dt-info-point { border-color: #2a2a2a; }
+.dt-sm-error { color: var(--dt-muted); padding: 20px 0; text-align: center; }
+
+@media (max-width: 640px) {
+  .dtsw-win { top: 8px; width: calc(100vw - 16px); padding: 0 16px; max-height: calc(100vh - 16px); }
+  .dtsw-win { --u: .62px; }
+  .dtt-toast { right: 8px; left: 8px; max-width: none; }
+  .dts-levels { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .dtsw-ind { transition: none; } }
+
+/* ---------- تبويب الظهور بمقياس مزدوج المقبض (فيبوناتشي / خط معلومات) ---------- */
+.dts-vrow { display: flex; align-items: center; gap: calc(var(--dt-u) * 14); height: calc(var(--dt-u) * 46); margin: calc(var(--dt-u) * 11) 0; direction: rtl; }
+.dts-vrow .dts-check { flex: none; }
+.dts-vname { width: calc(var(--dt-u) * 64); color: #BEBEBE; flex: none; white-space: nowrap; }
+.dts-vrow .dts-input { width: calc(var(--dt-u) * 78); height: calc(var(--dt-u) * 46); flex: none; text-align: center; padding: 0 4px; }
+.dts-dual { position: relative; width: calc(var(--dt-u) * 120); height: calc(var(--dt-u) * 18); flex: none; margin: 0 calc(var(--dt-u) * 9); }
+.dts-dual::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: calc(var(--dt-u) * 12); transform: translateY(-50%); background: #474747; border-radius: 999px; }
+.dts-dual-fill { position: absolute; top: 50%; height: calc(var(--dt-u) * 12); transform: translateY(-50%); background: #A4A4A4; pointer-events: none; }
+.dts-dual-h { position: absolute; top: 50%; width: calc(var(--dt-u) * 18); height: calc(var(--dt-u) * 18); margin: calc(var(--dt-u) * -9) 0 0 calc(var(--dt-u) * -9); border-radius: 50%; background: #F3F3F3; border: calc(var(--dt-u) * 3) solid #000; padding: 0; cursor: pointer; touch-action: none; box-sizing: border-box; }
+.dts-dual-h:focus-visible, .dts-dual-h.drag { outline: 2px solid #2962FF; }
+.dts-vrow.off .dts-vname { color: #8A8A8A; }
+.dts-vrow.off .dts-input { background: var(--dt-dis-bg); color: var(--dt-dis-tx); border-color: #2a2a2a; }
+.dts-vrow.off .dts-dual { opacity: .45; }
+.dts-disabled { opacity: .5; }
+.dts-disabled .dts-label { color: #8A8A8A; }

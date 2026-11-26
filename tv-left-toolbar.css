@@ -1,0 +1,78 @@
+/* =========================================================================
+   tv-left-toolbar.css — شريط الرسم الأيسر (مواصفات: الوضع الفاتح، مرجع 1728×1080)
+   كل القياسات نسبية: --u = عرض الشريط / 72  (=1px عند 72px)
+   ========================================================================= */
+:root {
+  --tv-left-w: clamp(52px, 4.1667vw, 72px);
+  --tvlt-u: calc(var(--tv-left-w) / 72);
+}
+/* الشارت يبدأ بعد الشريط الأيسر الجديد (لا نغيّر --tv-toolbar-width المشترك مع غيره) */
+#mcGrid { left: var(--tv-left-w) !important; }
+
+#tvLeftToolbar {
+  position: fixed; top: var(--tv-header-height, 34px); left: 0; bottom: 0;
+  width: var(--tv-left-w);
+  background: #FFFFFF; border-right: 1px solid #EAEAEA;
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 900; padding: calc(6 * var(--tvlt-u)) 0;
+  overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+  box-shadow: none; box-sizing: border-box;
+}
+#tvLeftToolbar::-webkit-scrollbar { display: none; }
+.tvlt-group { display: flex; flex-direction: column; align-items: center; gap: calc(6 * var(--tvlt-u)); width: 100%; }
+.tvlt-sep { width: calc(46 * var(--tvlt-u)); height: 1px; background: #EBEBEB; margin: calc(9 * var(--tvlt-u)) 0; flex-shrink: 0; }
+.tvlt-spacer { flex: 1 1 auto; min-height: calc(12 * var(--tvlt-u)); }
+
+.tvlt-btn {
+  width: calc(46 * var(--tvlt-u)); height: calc(46 * var(--tvlt-u));
+  border: none; background: transparent; color: #131722;
+  border-radius: calc(8 * var(--tvlt-u)); cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.tvlt-btn .tvlt-ic-wrap { display: flex; width: calc(30 * var(--tvlt-u)); height: calc(30 * var(--tvlt-u)); }
+.tvlt-btn .tvlt-ic { width: 100%; height: 100%; }
+.tvlt-btn:hover, .tvlt-btn.tvlt-open, .tvlt-btn.tvlt-active, .tvlt-btn.tvlt-tool-active { background: #EBEBEB; }
+.tvlt-btn:focus-visible { outline: 2px solid #2962FF; outline-offset: -2px; }
+.tvlt-favbtn { background: #222222 !important; color: #fff; }
+
+/* القائمة الجانبية */
+.tvlt-fly {
+  position: fixed; z-index: 1000; min-width: calc(353 * var(--tvlt-u)); width: max-content; max-width: calc(100vw - var(--tv-left-w) - 12px);
+  background: #fff; border-radius: calc(12 * var(--tvlt-u)); box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.08);
+  padding: calc(8 * var(--tvlt-u)); box-sizing: border-box; overflow-y: auto; direction: rtl; text-align: right;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+}
+.tvlt-row {
+  display: flex; flex-direction: row; align-items: center; gap: calc(10 * var(--tvlt-u));
+  height: calc(52 * var(--tvlt-u)); padding: 0 calc(12 * var(--tvlt-u)); margin: 2px 0;
+  border-radius: calc(10 * var(--tvlt-u)); color: #131722; cursor: pointer; font-size: max(13px, calc(16 * var(--tvlt-u))); white-space: nowrap;
+}
+.tvlt-row:hover { background: #F0F0F0; }
+.tvlt-row.tvlt-sel { background: #222222; color: #fff; }
+.tvlt-row-ic { width: calc(30 * var(--tvlt-u)); height: calc(30 * var(--tvlt-u)); flex: none; }
+.tvlt-row-grow { flex: 1 1 auto; min-width: 12px; }
+.tvlt-row-key { color: #8A8A8A; font-size: max(11px, calc(14 * var(--tvlt-u))); direction: ltr; }
+.tvlt-row.tvlt-sel .tvlt-row-key { color: #C4C4C4; }
+.tvlt-row-star { border: none; background: transparent; color: #A8A8A8; padding: 0; cursor: pointer; display: flex; width: calc(24 * var(--tvlt-u)); height: calc(24 * var(--tvlt-u)); }
+.tvlt-row-star svg { width: 100%; height: 100%; }
+.tvlt-row-star.on { color: #F5B301; } .tvlt-row-star.on svg { fill: currentColor; }
+.tvlt-row.tvlt-sel .tvlt-row-star { color: #fff; }
+.tvlt-soon { opacity: .4; color: #8A8A8A; cursor: not-allowed; } .tvlt-soon:hover { background: transparent; } .tvlt-soon .tvlt-row-label, .tvlt-soon .tvlt-row-key { color: #8A8A8A; }
+.tvlt-fly-head { color: #A8A8A8; font-size: max(11px, calc(12 * var(--tvlt-u))); height: calc(40 * var(--tvlt-u)); display: flex; align-items: center; padding: 0 calc(12 * var(--tvlt-u)); border-top: 1px solid #EBEBEB; margin-top: 4px; }
+.tvlt-fly-head:first-child { border-top: none; margin-top: 0; }
+.tvlt-fly-sep { height: 1px; background: #EBEBEB; margin: 6px 0; }
+
+/* التلميحة الزرقاء */
+.tvlt-hint {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 950; background: #2962FF; color: #fff;
+  border-radius: 10px; padding: 14px 44px 14px 18px; font-size: 14px; direction: rtl; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  max-width: calc(100vw - 24px); font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+}
+.tvlt-hint-x { position: absolute; top: 6px; left: 8px; background: transparent; border: none; color: #fff; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+
+/* لا نستخدم display:none (يصفّر getBoundingClientRect) — الزر القديم يبقى شفافاً */
+.tvlt-hidden-old { position: fixed !important; top: 0; left: 0; width: 24px; height: 24px; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important; }
+
+/* نافذة الإيموجي بجانب الشريط الجديد */
+#tvEmojiPicker { z-index: 1000; }

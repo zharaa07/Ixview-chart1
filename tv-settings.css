@@ -1,0 +1,228 @@
+/* =========================================================================
+   tv-settings.css — نافذة إعدادات الشارت (الوضع الفاتح، RTL)
+   مرجع التصميم: «مواصفات نافذة إعدادات الشارت — تريدنك فيو».
+   كل الأبعاد بالبكسل المرجعي (النافذة 1024px). على الشاشات الأضيق من 1048px
+   تُصغَّر النافذة بنفس النسبة عبر transform (يضبطها tv-settings.js)،
+   وتحت 720px تتحول إلى تخطيط للهاتف (تبويبات أفقية + عناصر أكبر نسبياً).
+   كل القواعد مقيّدة بـ #tvSettingsOverlay حتى لا تتأثر بقواعد button/select العامة.
+   ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
+
+#tvSettingsOverlay {
+  /* مقاسات مرجعية (قابلة للتبديل في وضع الهاتف) */
+  --tvs-fs: 24px; --tvs-fs-sec: 20px; --tvs-fs-title: 34px; --tvs-fs-tab: 24px;
+  --tvs-row: 68px; --tvs-ctl: 46px; --tvs-clr: 45px; --tvs-chk: 27px; --tvs-col: 190px;
+  --tvs-ink: #1F1F1F; --tvs-dim: #8A8A8A; --tvs-line: #E4E4E4; --tvs-dark: #242424;
+  position: fixed; inset: 0; z-index: 7000;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; direction: rtl;
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', 'Noto Sans Arabic', Tahoma, system-ui, sans-serif;
+  color: var(--tvs-ink); -webkit-font-smoothing: antialiased;
+}
+#tvSettingsOverlay.hidden { display: none; }
+#tvSettingsOverlay, #tvSettingsOverlay * { box-sizing: border-box; }
+#tvSettingsOverlay :where(button, input) {
+  all: unset; box-sizing: border-box; font-family: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#tvSettingsOverlay :where(button):focus-visible, #tvSettingsOverlay [tabindex]:focus-visible { outline: 2px solid #2962FF; outline-offset: 2px; }
+#tvSettingsOverlay input { cursor: text; }
+
+/* ---------------- الهيكل ---------------- */
+#tvSettingsOverlay #tvSettingsSheet {
+  position: relative; flex: 0 0 auto; width: 1024px; max-height: 1023px;
+  display: flex; flex-direction: column;
+  /* !important لأن tv-theme.css يفرض زجاجاً داكناً على #tvSettingsSheet بـ !important */
+  background: #FFFFFF !important; border: 0 !important; border-radius: 16px !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  box-shadow: 0 30px 90px rgba(0,0,0,.28), 0 6px 24px rgba(0,0,0,.12) !important;
+  transform-origin: center center; font-size: var(--tvs-fs);
+  animation: tvsPop .17s ease-out;
+}
+@keyframes tvsPop { from { opacity: 0; transform: scale(calc(var(--tvs-k,1) * .98)); } to { opacity: 1; transform: scale(var(--tvs-k,1)); } }
+#tvSettingsOverlay .tvs-header { position: relative; flex: 0 0 94px; }
+#tvSettingsOverlay .tvs-title { position: absolute; top: 14px; right: 28px; font-size: var(--tvs-fs-title); font-weight: 700; line-height: 42px; color: #111; }
+#tvSettingsOverlay .tvs-close { position: absolute; top: 22px; left: 32px; width: 26px; height: 26px; display: grid; place-items: center; color: #1F1F1F; border-radius: 6px; }
+#tvSettingsOverlay .tvs-close svg { width: 26px; height: 26px; }
+#tvSettingsOverlay .tvs-close:hover { background: #F0F0F0; }
+#tvSettingsOverlay .tvs-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: row; }
+#tvSettingsOverlay .tvs-tabs { flex: 0 0 281px; width: 281px; margin-inline-start: 28px; display: flex; flex-direction: column; gap: .6px; padding-bottom: 12px; }
+#tvSettingsOverlay .tvs-tab {
+  height: 54px; padding: 0 12px; border-radius: 12px; display: flex; align-items: center; gap: 14px;
+  font-size: var(--tvs-fs-tab); color: var(--tvs-ink); white-space: nowrap; flex: 0 0 auto;
+}
+#tvSettingsOverlay .tvs-tab svg { width: 28px; height: 28px; flex: 0 0 28px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#tvSettingsOverlay .tvs-tab:hover { background: #F7F7F7; }
+#tvSettingsOverlay #tvSettingsSheet .tvs-tab.active { background: #F2F2F2 !important; border-color: transparent !important; font-weight: 700; color: #111; }
+
+#tvSettingsOverlay .tvs-panel-wrap { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; margin-inline-start: 27px; display: flex; }
+#tvSettingsOverlay .tvs-panel { min-height: 0;
+  flex: 1 1 auto; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+  padding: 18px 0 44px 28px; scrollbar-width: thin; scrollbar-color: #D2D2D2 transparent; touch-action: pan-y;
+}
+#tvSettingsOverlay .tvs-panel::-webkit-scrollbar, #tvSettingsOverlay .tvs-list::-webkit-scrollbar { width: 6px; }
+#tvSettingsOverlay .tvs-panel::-webkit-scrollbar-track, #tvSettingsOverlay .tvs-list::-webkit-scrollbar-track { background: transparent; }
+#tvSettingsOverlay .tvs-panel::-webkit-scrollbar-thumb, #tvSettingsOverlay .tvs-list::-webkit-scrollbar-thumb { background: #D2D2D2 !important; border-radius: 3px; }
+#tvSettingsOverlay .tvs-footer { flex: 0 0 auto; display: flex; flex-direction: row; align-items: center; gap: 0; padding: 26px 28px 26px 26px; background: #FFFFFF; border-radius: 0 0 16px 16px; }
+#tvSettingsOverlay .tvs-footer .tvs-spacer { flex: 1 1 auto; }
+
+/* ---------------- أقسام وصفوف ---------------- */
+#tvSettingsOverlay .tvs-sec { font-size: var(--tvs-fs-sec); color: var(--tvs-dim); line-height: 28px; margin: 14px 0 0; padding-inline-start: 0; }
+#tvSettingsOverlay .tvs-sec:first-child { margin-top: 0; }
+#tvSettingsOverlay .tvs-item { margin: 0; }
+#tvSettingsOverlay .tvs-row { display: flex; flex-direction: row; align-items: center; min-height: var(--tvs-row); gap: 0; }
+#tvSettingsOverlay .tvs-row.sub { padding-inline-start: 20px; }
+#tvSettingsOverlay .tvs-row.sub2 { padding-inline-start: 40px; }
+#tvSettingsOverlay .tvs-row.dd { min-height: 71px; }
+#tvSettingsOverlay .tvs-lbl-wrap { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1 1 auto; }
+#tvSettingsOverlay .tvs-row.has-ctl .tvs-lbl-wrap { flex: 0 0 var(--tvs-col); width: var(--tvs-col); }
+#tvSettingsOverlay .tvs-row.has-ctl.sub .tvs-lbl-wrap { width: calc(var(--tvs-col) - 20px); flex-basis: calc(var(--tvs-col) - 20px); }
+#tvSettingsOverlay .tvs-row.has-ctl.sub2 .tvs-lbl-wrap { width: calc(var(--tvs-col) - 40px); flex-basis: calc(var(--tvs-col) - 40px); }
+#tvSettingsOverlay .tvs-lbl { font-size: var(--tvs-fs); line-height: 1.35; color: var(--tvs-ink); cursor: default; white-space: nowrap; }
+#tvSettingsOverlay .tvs-lbl.wrap { white-space: normal; }
+#tvSettingsOverlay .tvs-row.has-ctl .tvs-lbl { overflow: visible; }
+#tvSettingsOverlay .tvs-lbl.click { cursor: pointer; user-select: none; }
+#tvSettingsOverlay .tvs-ctls { display: flex; flex-direction: row; align-items: center; gap: 12px; min-width: 0; flex: 0 1 auto; }
+#tvSettingsOverlay .tvs-desc { font-size: var(--tvs-fs-sec); color: var(--tvs-dim); line-height: 28px; margin: -16px 0 10px; padding-inline-start: 41px; }
+#tvSettingsOverlay .tvs-row.sub + .tvs-desc { padding-inline-start: 61px; }
+#tvSettingsOverlay .tvs-info {
+  flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; background: #BDBDBD; color: #fff;
+  display: grid; place-items: center; font-size: 15px; font-weight: 700; line-height: 1; cursor: help; user-select: none;
+}
+#tvSettingsOverlay .tvs-note { font-size: 17px; color: var(--tvs-dim); line-height: 24px; padding: 4px 0 8px 0; }
+
+/* ---------------- مربع الاختيار ---------------- */
+#tvSettingsOverlay .tvs-checkbox {
+  flex: 0 0 var(--tvs-chk); width: var(--tvs-chk); height: var(--tvs-chk); border-radius: 6px;
+  background: #FFFFFF; border: 2px solid #9A9A9A; display: grid; place-items: center; color: #fff; transition: background .08s;
+}
+#tvSettingsOverlay .tvs-checkbox svg { width: 19px; height: 19px; opacity: 0; }
+#tvSettingsOverlay .tvs-checkbox.checked { background: var(--tvs-dark); border-color: var(--tvs-dark); }
+#tvSettingsOverlay .tvs-checkbox.checked svg { opacity: 1; }
+#tvSettingsOverlay .tvs-checkbox:hover:not(.checked) { border-color: #6C6C6C; }
+
+/* ---------------- القوائم المنسدلة ---------------- */
+#tvSettingsOverlay .tvs-dd {
+  position: relative; height: var(--tvs-ctl); min-width: 60px; background: #fff; border: 1px solid var(--tvs-line); border-radius: 10px;
+  display: flex; align-items: center; padding: 0 14px 0 10px; font-size: var(--tvs-fs); color: var(--tvs-ink); text-align: right; gap: 8px; max-width: 100%;
+}
+#tvSettingsOverlay .tvs-dd .tvs-dd-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; padding-inline-start: 4px; }
+#tvSettingsOverlay .tvs-dd svg { flex: 0 0 18px; width: 18px; height: 18px; stroke: #333; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .12s; }
+#tvSettingsOverlay .tvs-dd.open { border-color: #222; box-shadow: inset 0 0 0 1px #222; }
+#tvSettingsOverlay .tvs-dd.open svg { transform: rotate(180deg); }
+#tvSettingsOverlay .tvs-dd:hover:not(.disabled):not(.open) { border-color: #C9C9C9; }
+#tvSettingsOverlay .tvs-dd.template { border-radius: 10px; }
+#tvSettingsOverlay .tvs-dd.template.open { border-color: #2962FF; box-shadow: inset 0 0 0 1px #2962FF; }
+#tvSettingsOverlay .tvs-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+#tvSettingsOverlay .tvs-list {
+  position: absolute; pointer-events: auto; background: #fff; border-radius: 10px; padding: 0; margin: 0; list-style: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.10); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: #D2D2D2 transparent; touch-action: pan-y; border: 1px solid #EFEFEF;
+}
+#tvSettingsOverlay .tvs-opt { height: 44px; padding: 0 16px; display: flex; align-items: center; font-size: var(--tvs-fs); color: var(--tvs-ink); border-radius: 10px; cursor: pointer; white-space: nowrap; user-select: none; }
+#tvSettingsOverlay .tvs-opt:hover { background: #F0F0F0; }
+#tvSettingsOverlay .tvs-opt.selected { background: #222222; color: #fff; }
+#tvSettingsOverlay .tvs-list.menu .tvs-opt { height: 36px; color: #6F6F6F; font-size: 21px; }
+#tvSettingsOverlay .tvs-list.menu .tvs-opt.sep { height: 1px; padding: 0; background: #ECECEC; border-radius: 0; margin: 4px 0; pointer-events: none; }
+#tvSettingsOverlay .is-disabled, #tvSettingsOverlay .tvs-dd.disabled { pointer-events: none; }
+#tvSettingsOverlay .tvs-dd.disabled { background: #F2F2F2; color: var(--tvs-dim); border-color: #F2F2F2; }
+#tvSettingsOverlay .tvs-dd.disabled svg { stroke: #9A9A9A; }
+
+/* ---------------- حقل رقمي ---------------- */
+#tvSettingsOverlay .tvs-num { display: flex; align-items: center; gap: 8px; }
+#tvSettingsOverlay .tvs-numbox { width: 100px; height: var(--tvs-ctl); border: 1px solid var(--tvs-line); border-radius: 10px; background: #fff; display: flex; align-items: center; padding: 0 12px; }
+#tvSettingsOverlay .tvs-numbox input { flex: 1 1 auto; min-width: 0; width: 100%; font-size: var(--tvs-fs); color: var(--tvs-ink); text-align: right; direction: ltr; }
+#tvSettingsOverlay .tvs-numbox:focus-within { border-color: #222; box-shadow: inset 0 0 0 1px #222; }
+#tvSettingsOverlay .tvs-numbox.disabled { background: #F2F2F2; border-color: #F2F2F2; } 
+#tvSettingsOverlay .tvs-numbox.disabled input { color: var(--tvs-dim); cursor: default; }
+#tvSettingsOverlay .tvs-numbox.wide { width: 245px; }
+#tvSettingsOverlay .tvs-numbox svg { width: 18px; height: 18px; stroke: #333; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 18px; cursor: pointer; }
+#tvSettingsOverlay .tvs-unit { font-size: var(--tvs-fs); color: var(--tvs-ink); }
+#tvSettingsOverlay .tvs-unit.small { font-size: var(--tvs-fs-sec); color: var(--tvs-dim); }
+
+/* ---------------- أزرار الألوان ---------------- */
+#tvSettingsOverlay .tvs-color-sw {
+  flex: 0 0 var(--tvs-clr); width: var(--tvs-clr); height: var(--tvs-clr); border-radius: 8px; border: 1px solid #E4E4E4; position: relative; overflow: hidden;
+  background-color: #fff;
+}
+#tvSettingsOverlay .tvs-color-sw::after { content: ''; position: absolute; inset: 0; background: var(--sw, #fff); }
+#tvSettingsOverlay .tvs-color-sw.checker, #tvSettingsOverlay .tvs-check-bg {
+  background-color: #fff;
+  background-image: linear-gradient(45deg, #CFCFCF 25%, transparent 25%, transparent 75%, #CFCFCF 75%), linear-gradient(45deg, #CFCFCF 25%, transparent 25%, transparent 75%, #CFCFCF 75%);
+  background-size: 12px 12px; background-position: 0 0, 6px 6px;
+}
+#tvSettingsOverlay .tvs-color-sw.is-disabled, #tvSettingsOverlay .tvs-combo.is-disabled { opacity: .55; }
+#tvSettingsOverlay .tvs-combo { flex: 0 0 100px; width: 100px; height: var(--tvs-clr); border-radius: 8px; border: 1px solid #E4E4E4; background: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 8px; }
+#tvSettingsOverlay .tvs-combo.is-disabled { background: #F2F2F2; border-color: #F2F2F2; }
+#tvSettingsOverlay .tvs-combo .ln { width: 34px; height: 0; border-top: 2px solid #000; }
+#tvSettingsOverlay .tvs-combo .ln.dashed { border-top-style: dashed; }
+#tvSettingsOverlay .tvs-combo .ln.gray { border-top-color: #9E9E9E; }
+#tvSettingsOverlay .tvs-combo .sq { width: 26px; height: 26px; border-radius: 5px; border: 1px solid rgba(0,0,0,.08); position: relative; overflow: hidden; flex: 0 0 26px; }
+#tvSettingsOverlay .tvs-combo .sq::after { content: ''; position: absolute; inset: 0; background: var(--sw, #9E9E9E); }
+#tvSettingsOverlay .tvs-combo .sq.diag::after { background: linear-gradient(135deg, var(--sw-a, #16A97D) 0 50%, var(--sw-b, #E3224F) 50% 100%); }
+
+/* ---------------- شريط السحب ---------------- */
+#tvSettingsOverlay .tvs-slider { position: relative; width: 200px; height: 30px; direction: ltr; touch-action: none; cursor: grab; flex: 0 0 200px; }
+#tvSettingsOverlay .tvs-slider.dragging { cursor: grabbing; }
+#tvSettingsOverlay .tvs-s-track { position: absolute; left: 0; right: 0; top: 10px; height: 10px; border-radius: 5px; background: #E6E6E6; overflow: hidden; }
+#tvSettingsOverlay .tvs-s-track.alpha { background-color: #fff; background-image: linear-gradient(90deg, rgba(154,185,245,0), #9AB9F5), linear-gradient(45deg, #CFCFCF 25%, transparent 25%, transparent 75%, #CFCFCF 75%), linear-gradient(45deg, #CFCFCF 25%, transparent 25%, transparent 75%, #CFCFCF 75%); background-size: 100% 100%, 10px 10px, 10px 10px; background-position: 0 0, 0 0, 5px 5px; }
+#tvSettingsOverlay .tvs-s-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #7B7B7B; border-radius: 5px; }
+#tvSettingsOverlay .tvs-s-knob { position: absolute; top: 6px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid #6B6B6B; box-shadow: 0 1px 3px rgba(0,0,0,.2); margin-left: 0; }
+#tvSettingsOverlay .tvs-slider.is-disabled { opacity: .45; }
+#tvSettingsOverlay .tvs-spk { width: 30px; height: 30px; flex: 0 0 30px; stroke: #333; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------------- أزرار التذييل ---------------- */
+#tvSettingsOverlay .tvs-btn { height: 45px; display: grid; place-items: center; border-radius: 12px; font-size: 24px; font-weight: 500; white-space: nowrap; }
+#tvSettingsOverlay .tvs-btn.primary { width: 92px; background: #242424; color: #fff; }
+#tvSettingsOverlay .tvs-btn.primary:hover { background: #3A3A3A; }
+#tvSettingsOverlay .tvs-btn.secondary { width: 76px; margin-inline-start: 17px; background: #fff; border: 2px solid #222; color: #111; }
+#tvSettingsOverlay .tvs-btn.secondary:hover { background: #F5F5F5; }
+#tvSettingsOverlay .tvs-footer .tvs-dd.template { width: 136px; min-width: 136px; height: 45px; }
+
+/* ---------------- نافذة «حفظ باسم» (تقدير تنفيذي — غير ظاهرة في المرجع) ---------------- */
+#tvSettingsOverlay .tvs-modal { position: absolute; inset: 0; z-index: 30; background: rgba(255,255,255,.55); display: flex; align-items: center; justify-content: center; border-radius: 16px; }
+#tvSettingsOverlay .tvs-modal.hidden { display: none; }
+#tvSettingsOverlay .tvs-modal-card { width: 460px; max-width: 92%; background: #fff; border-radius: 14px; box-shadow: 0 12px 48px rgba(0,0,0,.25); padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+#tvSettingsOverlay .tvs-modal-card h3 { margin: 0; font-size: 26px; font-weight: 700; }
+#tvSettingsOverlay .tvs-modal-card .tvs-text { height: 46px; border: 1px solid var(--tvs-line); border-radius: 10px; padding: 0 14px; font-size: 22px; width: 100%; display: block; color: #111; }
+#tvSettingsOverlay .tvs-modal-card .tvs-text:focus { border-color: #222; box-shadow: inset 0 0 0 1px #222; }
+#tvSettingsOverlay .tvs-modal-actions { display: flex; flex-direction: row; gap: 12px; }
+#tvSettingsOverlay .tvs-modal-actions .tvs-btn { margin: 0; }
+
+/* ---------------- وضع الهاتف / الشاشات الصغيرة ---------------- */
+#tvSettingsOverlay.tvs-mobile {
+  --tvs-fs: 17px; --tvs-fs-sec: 14px; --tvs-fs-title: 24px; --tvs-fs-tab: 15px;
+  --tvs-row: 52px; --tvs-ctl: 42px; --tvs-clr: 40px; --tvs-chk: 24px; --tvs-col: 150px;
+}
+#tvSettingsOverlay.tvs-mobile #tvSettingsSheet { width: calc(100vw - 12px); max-width: none; height: calc(100% - 12px); max-height: none; border-radius: 14px; }
+#tvSettingsOverlay.tvs-mobile .tvs-header { flex-basis: 56px; }
+#tvSettingsOverlay.tvs-mobile .tvs-title { top: 8px; right: 16px; line-height: 40px; }
+#tvSettingsOverlay.tvs-mobile .tvs-close { top: 14px; left: 14px; }
+#tvSettingsOverlay.tvs-mobile .tvs-main { flex-direction: column; }
+#tvSettingsOverlay.tvs-mobile .tvs-tabs { flex: 0 0 auto; width: auto; margin: 0 10px; flex-direction: row; overflow-x: auto; overflow-y: hidden; gap: 4px; padding-bottom: 6px; scrollbar-width: none; touch-action: pan-x; }
+#tvSettingsOverlay.tvs-mobile .tvs-tabs::-webkit-scrollbar { display: none; }
+#tvSettingsOverlay.tvs-mobile .tvs-tab { height: 42px; padding: 0 12px; gap: 8px; border-radius: 10px; }
+#tvSettingsOverlay.tvs-mobile .tvs-tab svg { width: 20px; height: 20px; flex-basis: 20px; }
+#tvSettingsOverlay.tvs-mobile .tvs-panel-wrap { margin: 0; }
+#tvSettingsOverlay.tvs-mobile .tvs-panel { padding: 8px 16px 12px 12px; }
+#tvSettingsOverlay.tvs-mobile .tvs-row { flex-wrap: wrap; row-gap: 6px; padding-block: 6px; }
+#tvSettingsOverlay.tvs-mobile .tvs-row.has-ctl .tvs-lbl-wrap { flex: 1 1 100%; width: auto; }
+#tvSettingsOverlay.tvs-mobile .tvs-row.has-ctl.sub .tvs-lbl-wrap, #tvSettingsOverlay.tvs-mobile .tvs-row.has-ctl.sub2 .tvs-lbl-wrap { flex: 1 1 100%; width: auto; }
+#tvSettingsOverlay.tvs-mobile .tvs-lbl { white-space: normal; }
+#tvSettingsOverlay.tvs-mobile .tvs-ctls { flex-wrap: wrap; padding-inline-start: 38px; }
+#tvSettingsOverlay.tvs-mobile .tvs-desc { margin: -4px 0 8px; padding-inline-start: 38px; }
+#tvSettingsOverlay.tvs-mobile .tvs-dd { max-width: 100%; }
+#tvSettingsOverlay.tvs-mobile .tvs-slider { width: 150px; flex-basis: 150px; }
+#tvSettingsOverlay.tvs-mobile .tvs-footer { padding: 12px 14px; flex-wrap: nowrap; }
+#tvSettingsOverlay.tvs-mobile .tvs-btn { height: 42px; font-size: 18px; }
+#tvSettingsOverlay.tvs-mobile .tvs-footer .tvs-dd.template { width: 110px; height: 42px; }
+#tvSettingsOverlay.tvs-mobile .tvs-opt { height: 42px; }
+
+@media (prefers-reduced-motion: reduce) { #tvSettingsOverlay #tvSettingsSheet { animation: none; } }
+
+/* عمود التحكم يختلف قليلاً بين التبويبات في المرجع (قياس من الفيديو) */
+#tvSettingsOverlay .tvs-panel[data-tab="statusline"] { --tvs-col: 160px; }
+#tvSettingsOverlay .tvs-panel[data-tab="scales"] { --tvs-col: 300px; }
+#tvSettingsOverlay .tvs-panel[data-tab="canvas"] { --tvs-col: 280px; }
+#tvSettingsOverlay .tvs-panel[data-tab="trading"] { --tvs-col: 340px; }
+#tvSettingsOverlay.tvs-mobile .tvs-panel[data-tab] { --tvs-col: 150px; }

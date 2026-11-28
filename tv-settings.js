@@ -486,7 +486,7 @@
     let value = opts.value; let disabled = !!opts.disabled;
     const btn = mk('button', 'tvs-dd' + (opts.template ? ' template' : ''), '<span class="tvs-dd-text"></span>' + SVG.chev);
     btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false');
-    if (opts.width) btn.style.minWidth = opts.width + 'px';
+    if (opts.width) { btn.dataset.w = opts.width; btn.style.setProperty('--w', opts.width); }
     const txt = btn.querySelector('.tvs-dd-text');
     const labelOf = v => { const f = (opts.options || []).find(o => o[0] === v); return f ? f[1] : (opts.fixedLabel || ''); };
     const paint = () => { txt.textContent = opts.fixedLabel || labelOf(value); };
@@ -496,7 +496,7 @@
       if (!listEl) return;
       const sr = sheetEl.getBoundingClientRect(); const k = (sr.width / sheetEl.offsetWidth) || 1;
       const r = btn.getBoundingClientRect();
-      const items = listEl.children.length; const itemH = opts.menu ? 36 : (parseFloat(getComputedStyle(listEl.firstChild || btn).height) || 44);
+      const items = listEl.children.length; const itemH = opts.menu ? 30 : (parseFloat(getComputedStyle(listEl.firstChild || btn).height) || 44);
       let natural = Math.min(items * itemH + 2, opts.maxHeight || 800);
       listEl.style.width = (r.width / k) + 'px'; listEl.style.minWidth = (r.width / k) + 'px';
       const below = (global.innerHeight - r.bottom - 8) / k, above = (r.top - 8) / k;
@@ -593,7 +593,7 @@
     if (opt.alpha) fill.style.display = 'none';
     const knob = mk('div', 'tvs-s-knob'); root.appendChild(track); root.appendChild(knob);
     let dragging = false; let dis = false;
-    const KN = 18;
+    const KN = 14;
     function render() {
       const f = Math.max(0, Math.min(1, value / 100));
       knob.style.left = 'calc(' + f + ' * (100% - ' + KN + 'px))';
@@ -936,11 +936,8 @@
     const mobile = vw < 720;
     overlayEl.classList.toggle('tvs-mobile', mobile);
     if (mobile) { sheetEl.style.transform = ''; sheetEl.style.setProperty('--tvs-k', 1); sheetEl.style.maxHeight = ''; sheetEl.style.height = ''; return; }
-    const k = Math.min(1, (vw - 16) / 1024);
-    sheetEl.style.setProperty('--tvs-k', k);
-    sheetEl.style.transform = k < 1 ? 'scale(' + k + ')' : '';
-    const maxH = Math.min(1023, Math.floor((vh - 16) / k));
-    sheetEl.style.maxHeight = maxH + 'px'; sheetEl.style.height = '';
+    // أحجام حقيقية (بدون transform): العرض والارتفاع من CSS (min(66vw,1100px) و85vh)
+    sheetEl.style.transform = ''; sheetEl.style.maxHeight = ''; sheetEl.style.height = '';
   }
 
   function open() {
